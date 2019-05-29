@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.github.biorobaw</groupId>
+  <artifactId>Pi3Robot2019JavaClient</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Pi 3 Robot 2019 Java Client</name>
+  <description>A java client to connect to our Pi 3 Robot 2019 using ROS</description>
+  
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+	<maven.compiler.target>11</maven.compiler.target>
+  </properties>
+  
+  <dependencies>
+        <dependency>
+			<groupId>org.ros.rosjava_core</groupId>
+			<artifactId>rosjava</artifactId>
+			<version>0.3.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ros.rosjava_messages</groupId>
+			<artifactId>geometry_msgs</artifactId>
+			<version>1.12.7</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.ros.rosjava_messages</groupId>
+			<artifactId>nav_msgs</artifactId>
+			<version>1.12.7</version>
+		</dependency> -->
+		<dependency>
+			<groupId>org.ros.rosjava_messages</groupId>
+			<artifactId>std_msgs</artifactId>
+			<version>0.5.11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ros.rosjava_bootstrap</groupId>
+			<artifactId>message_generation</artifactId>
+			<version>0.3.3</version>
+		</dependency>
+	</dependencies>
+	
+	
+	<repositories>
+		<repository>
+			<id>rosjava</id>
+			<name>Maven artifact repository for rosjava dependencies and builds.</name>
+			<url>https://github.com/rosjava/rosjava_mvn_repo/raw/master</url>
+		</repository>
+		<repository>
+			<id>spring</id>
+			<name>springsource</name>
+			<url>http://repo.jfrog.org/artifactory/libs-releases/</url>
+		</repository>
+
+	</repositories>
+	
+  
+  
+</project>
