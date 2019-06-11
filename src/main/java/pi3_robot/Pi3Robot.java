@@ -1,13 +1,9 @@
+package pi3_robot;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 
-import javax.crypto.spec.SecretKeySpec;
-
-import org.ros.RosCore;
 import org.ros.internal.loader.CommandLineLoader;
-import org.ros.internal.message.RawMessage;
-import org.ros.message.MessageFactory;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
@@ -105,7 +101,7 @@ public class Pi3Robot extends AbstractNodeMain  {
 //		System.out.println("Pi3Robot: SHUTTING DOWN");
 	}
 
-	synchronized void setSpeed(float v, float w) {
+	synchronized public void setSpeed(float v, float w) {
 		var msg = speed_publisher.newMessage();
 		msg.getAngular().setZ(w);
 		msg.getLinear().setX(v);
