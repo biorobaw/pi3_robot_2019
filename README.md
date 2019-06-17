@@ -29,26 +29,32 @@ It consists of 3 pieces of software:
  3. Request the robot drivers to the lab mantainer, and copy them in the robot's folder (~/drivers)
  4. Use maven to include the java client to your code. 
     To do so, add the following lines to your pom file (replace for an adequate version number):
+     ```
      <repositories>
       <repository>
           <id>jitpack.io</id>
           <url>https://jitpack.io</url>
       </repository>
     </repositories>
+    
     <dependencies>
-  	<dependency>
+  	  <dependency>
         <groupId>com.github.biorobaw</groupId>
         <artifactId>Pi3Robot2019JavaClient</artifactId>
         <version>VERSION_NUMBER</version>
       </dependency>
     </dependencies>
+    ```
     
   # Usage (needs revision)
   
   1. Start roscore
-  2. In he robot, set environment variables ROS_IP and ROS_SERVER_URI (http://wiki.ros.org/ROS/Tutorials/MultipleMachines)
-  3. Run the server node in the robot by running the command: rosrun pi3_robot_2019 motionController.py
-  4. In your code, create an instance of Pi3Robot providing the ip and port of ros master, as well as the id of the robot.
-  5. Run your code, make sure to wait for the connection to be established before sending commands to the robot.
+  2. In PC:
+      1. In your code, create an instance of Pi3Robot providing the ip and port of ros master, as well as the id of the robot. Sample usage code is provided in the main function of class `Pi3Robot.java`.
+      2. Run your code, make sure to wait for the robot to be up before sending commands to the robot. Currently there is a bug which requires the pc ros node to start before the robot.    
+  3. In the robot:
+      1. set environment variables `ROS_IP` and `ROS_SERVER_URI` (http://wiki.ros.org/ROS/Tutorials/MultipleMachines)
+      2. run the following command:  `rosrun pi3_robot_2019 motionController.py`
+  
   
   
