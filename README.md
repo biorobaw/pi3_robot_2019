@@ -1,4 +1,4 @@
-﻿# Pi3Robot2019
+﻿# pi3_robot_2019
 
 The project implements a ROS controller for the lab's robot.
 It consists of 3 pieces of software:
@@ -40,7 +40,7 @@ It consists of 3 pieces of software:
     <dependencies>
   	  <dependency>
         <groupId>com.github.biorobaw</groupId>
-        <artifactId>Pi3Robot2019</artifactId>
+        <artifactId>pi3_robot_2019</artifactId>
         <version>VERSION_NUMBER</version>
       </dependency>
     </dependencies>
