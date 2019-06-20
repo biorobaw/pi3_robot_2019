@@ -1,4 +1,4 @@
-﻿# Pi3Robot2019JavaClient
+﻿# Pi3Robot2019
 
 The project implements a ROS controller for the lab's robot.
 It consists of 3 pieces of software:
