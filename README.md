@@ -40,7 +40,7 @@ It consists of 3 pieces of software:
     <dependencies>
   	  <dependency>
         <groupId>com.github.biorobaw</groupId>
-        <artifactId>Pi3Robot2019JavaClient</artifactId>
+        <artifactId>Pi3Robot2019J</artifactId>
         <version>VERSION_NUMBER</version>
       </dependency>
     </dependencies>
