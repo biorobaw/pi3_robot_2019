@@ -8,7 +8,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import MultiArrayLayout
 from std_msgs.msg import MultiArrayDimension
-sys.path.append(os.path.abspath("/home/pi/drivers"))
+sys.path.append(os.path.abspath("/home/pi/catkin_ws/src/pi3_robot_2019/drivers"))
 import MyServos
 import MySensors
 import subprocess
