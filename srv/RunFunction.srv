@@ -1,0 +1,4 @@
+string function_id
+string[] params
+---
+string result
