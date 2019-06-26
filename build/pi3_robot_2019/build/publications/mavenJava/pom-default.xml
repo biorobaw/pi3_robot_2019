@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ros.rosjava_messages</groupId>
   <artifactId>pi3_robot_2019</artifactId>
-  <version>0.1.0</version>
+  <version>0.0.0</version>
   <dependencies>
     <dependency>
       <groupId>org.ros.rosjava_bootstrap</groupId>
