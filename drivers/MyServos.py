@@ -24,8 +24,8 @@ servo_stop = 307      #No servo movement
 servo_min  = 307 - MAX_INPUT #Full reverse
 servo_max  = 307 + MAX_INPUT #Full foward
 
-LEFT_SERVO  = 1
-RIGHT_SERVO = 0
+LEFT_SERVO  = 0
+RIGHT_SERVO = 1
 
 #Calibrate these vlaue (in meters):
 HALF_WHEEL_DISTANCE = 0.05207 #4.1" full distance: 0.05"=0.05207m
