@@ -7,8 +7,8 @@
   <description>A java client to connect to our Pi 3 Robot 2019 using ROS</description>
   
   <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-	<maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>10</maven.compiler.source>
+	<maven.compiler.target>10</maven.compiler.target>
   </properties>
   
   <dependencies>
@@ -33,10 +33,28 @@
 			<version>0.5.11</version>
 		</dependency>
 		<dependency>
+			<groupId>org.ros.rosjava_messages</groupId>
+			<artifactId>sensor_msgs</artifactId>
+			<version>1.12.7</version>
+		</dependency>
+		<dependency>
 			<groupId>org.ros.rosjava_bootstrap</groupId>
 			<artifactId>message_generation</artifactId>
 			<version>0.3.3</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/us.ihmc.thirdparty.org.opencv/opencv -->
+		<dependency>
+		    <groupId>org.openpnp</groupId>
+		    <artifactId>opencv</artifactId>
+		    <version>3.4.2-0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.github.biorobaw</groupId>
+			<artifactId>pi3_robot_messages</artifactId>
+			<version>0.1.0</version>
+		</dependency>
+		
 	</dependencies>
 	
 	
@@ -50,6 +68,10 @@
 			<id>spring</id>
 			<name>springsource</name>
 			<url>http://repo.jfrog.org/artifactory/libs-releases/</url>
+		</repository>
+		<repository>
+			<id>ros_conroller</id>
+			<url>http://raw.github.com/biorobaw/pi3_robot_2019/ros_controller</url>
 		</repository>
 
 	</repositories>
