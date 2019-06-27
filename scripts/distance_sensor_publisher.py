@@ -42,7 +42,8 @@ def on_shutdown():
 	MySensors.exitSensors()
 
 if __name__ == '__main__':
-	
+	print(os.environ['ROS_IP'])
+	print(os.environ['ROS_MASTER_URI'])
 	# get robot id
 	try:
 		robot_id = json.load(open(driver_folder + '/robot_id.json','rb'))

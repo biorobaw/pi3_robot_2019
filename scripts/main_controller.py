@@ -108,22 +108,31 @@ if __name__ == '__main__':
 	
 	try:
 		# init node and stop servos, then set shutdown cleanup function
-		rospy.init_node('robot')
+		print('Createing node...')
+		rospy.init_node(robot_ros_name()+'_robot')
 		MyServos.setSpeeds(0,0)
 		rospy.on_shutdown(on_shutdown)
+		print('node created')
 		
 		# init subscribers:
+		print('creating speed_vw subscriber...')
 		rospy.Subscriber(robot_ros_name()+"/speed_vw",
 						 Twist,
 						 set_speeds_vw)
+		print('Subscriber created')
 
+		print('creating service run_function...')
 		# init services:
 		rospy.Service(robot_ros_name()+"/run_function",
 					  RunFunction,
 					  handle_run_function)
+		print('Service Created')
+		
 		
 		# spin until shutdown
+		print('Waiting for commands...')
 		rospy.spin()
+		print('Shutting down')
 
 
 	except Exception as e:
