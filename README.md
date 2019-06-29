@@ -39,4 +39,9 @@ To use the controller you have to do the following:
   2. Run the following command:  `rosrun pi3_robot_2019 mainController.py`
   3. Run a client to control the robot, currently 
 
+# Notes for future developers
+If you need to add more custom ros services, you will first have to modifiy this branch adding the .srv files. 
+Then, in a machine with rosjava installer, run the script export_java.sh, you will be prompted to enter a version number. 
+See https://semver.org/ for choosing an adequate version number. Commit and push the changes. 
+Finally, in branch `java_client`, update the pom file and use the new services.
 
