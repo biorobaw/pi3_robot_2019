@@ -56,7 +56,7 @@ It consists of 3 pieces of software:
  Currently, only set speeds commands are supported and no feedback is implemented. 
  Note that basic ROS usage knowledge is expected.
  
-# Notes for future developers:
+# Notes for future developers
 
   If you need to add more custom ros services, you will first have to modifiy branch `ros_controller` adding the `.srv` files.
   Then, in a machine with rosjava installer, run the script `export_java.sh`, you will be prompted to enter a version number.
