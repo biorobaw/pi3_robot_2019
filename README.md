@@ -1,34 +1,27 @@
-﻿# Pi3Robot2019JavaClient
+# pi3_robot_2019
 
-The project implements a ROS controller for the lab's robot.
-It consists of 3 pieces of software:
-  1. A rosnode in java implementing the client
-  2. A rosnode in python implementing the server
-  3. Robot drivers (not included in the repository)
+This project implements ROS controllers for the lab's pi3_robot made in 2019
+Currently there are 2 important branches:
+    ros_controller (this branch), implements the controller for the robot
+    java_client, which implements a java client to communicate with the robot.
+    
+# Java Client capabilities
 
-# Current functionality
- 
- Currently, only set speeds commands are supported and no feedback is implemented.
+The java client provides a java API to use the functionalities offered by the ros controller. 
+Currently the following functionalities are provided:
 
-# TODO
+    * Set speeds through a ros publisher of Twist messages defining linear and angular speeds
+    * Ability to load sub-modules via a custom ros service (RunFunction) including:
+           * a camera sub-module
+           * a distance sensor sub-module
+    * Ability to read camera frames via a ros subscriber of compressed images and transform them into opencv mat objects.
+    * Ability to read distance sensor information via a ros subscriber.
 
- Implement publisher in the robot to post sensor data (camera, distance sensors, battery, etc).
- Implement listener in client to read the data.
- Implement services in the robot to get feedback (command received, command completed, etc)
+# JAVA API Installation
 
-# Prerequisites
-
- The project assumes ROS is already installed in the robot, as well
- as the dependencies to use the hardware of the lab's Pi3Robot2019, 
- and basic ROS knowledge.
-
-# Installation (needs verification):
-
- 1. Copy the folder catkin_ws from the repository to the robot's home diretory (~/)
- 2. cd into the the copied folder (~/catkin_ws) and run the command: catkin_make (see how to use catkin workspaces in ROS tutorials)
- 3. Request the robot drivers to the lab mantainer, and copy them in the robot's folder (~/drivers)
- 4. Use maven to include the java client to your code. 
-    To do so, add the following lines to your pom file (replace for an adequate version number):
+Use maven to include the java client in your code. 
+    To do so, add the following lines to your pom file ( replace for an adequate version number ):
+     ```
      <repositories>
       <repository>
           <id>jitpack.io</id>
@@ -38,17 +31,39 @@ It consists of 3 pieces of software:
     <dependencies>
   	<dependency>
         <groupId>com.github.biorobaw</groupId>
-        <artifactId>Pi3Robot2019JavaClient</artifactId>
-        <version>VERSION_NUMBER</version>
+        <artifactId>pi3_robot_2019</artifactId>
+        <version>java-client-1.0.0</version> <!-- Substitute by a correct version number-->
       </dependency>
     </dependencies>
-    
-  # Usage (needs revision)
+    ```
+Alternatively, download and compile the code.
+
+# Usage
+
+To see how to use the API, read the example main function in `Pi3Robot2019.java`
+
+
+# Pi3Robot2019JavaClient
+
+The project implements a ROS controller for the lab's robot.
+It consists of 3 pieces of software:
+  1. A rosnode in java implementing the client
+  2. A rosnode in python implementing the server
+  3. Robot drivers (not included in the repository)
+
+# Current functionality
+ 
+ Currently, only set speeds commands are supported and no feedback is implemented. 
+ Note that basic ROS usage knowledge is expected.
+ 
+# Notes for future developers:
+
+  If you need to add more custom ros services, you will first have to modifiy branch `ros_controller` adding the `.srv` files.
+  Then, in a machine with rosjava installer, run the script `export_java.sh`, you will be prompted to enter a version number.
+  See `https://semver.org/` for choosing an adequate version number. Commit and push the changes.
+  Finally, in this branch, update the pom file and use your new service.
   
-  1. Start roscore
-  2. In he robot, set environment variables ROS_IP and ROS_SERVER_URI (http://wiki.ros.org/ROS/Tutorials/MultipleMachines)
-  3. Run the server node in the robot by running the command: rosrun pi3_robot_2019 motionController.py
-  4. In your code, create an instance of Pi3Robot providing the ip and port of ros master, as well as the id of the robot.
-  5. Run your code, make sure to wait for the connection to be established before sending commands to the robot.
+
+
   
   
