@@ -22,19 +22,19 @@ Currently the following functionalities are provided:
 Use maven to include the java client in your code. 
     To do so, add the following lines to your pom file ( replace for an adequate version number ):
 ```
-     <repositories>
-      <repository>
-          <id>jitpack.io</id>
-          <url>https://jitpack.io</url>
-      </repository>
-    </repositories>
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
     <dependencies>
   	<dependency>
         <groupId>com.github.biorobaw</groupId>
         <artifactId>pi3_robot_2019</artifactId>
         <version>java-client-1.0.0</version> 
-      </dependency>
-    </dependencies>
+    </dependency>
+</dependencies>
 ```
 Alternatively, download and compile the code.
 
