@@ -61,7 +61,7 @@ It consists of 3 pieces of software:
   If you need to add more custom ros services, you will first have to modifiy branch `ros_controller` adding the `.srv` files.
   Then, in a machine with rosjava installer, run the script `export_java.sh`, you will be prompted to enter a version number.
   See https://semver.org/ for choosing an adequate version number. Commit and push the changes.
-  Finally, in this branch, update the pom file and use your new service.
+  Finally, in this branch, update the pom file and use the new services.
   
 
 
