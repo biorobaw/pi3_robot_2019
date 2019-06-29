@@ -32,7 +32,7 @@ Use maven to include the java client in your code.
   	<dependency>
         <groupId>com.github.biorobaw</groupId>
         <artifactId>pi3_robot_2019</artifactId>
-        <version>java-client-1.0.0</version> 
+        <version>java_client-1.0.0</version> 
     </dependency>
 </dependencies>
 ```
