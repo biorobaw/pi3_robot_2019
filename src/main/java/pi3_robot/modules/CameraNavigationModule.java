@@ -55,7 +55,7 @@ public class CameraNavigationModule {
 	}
 	
 	synchronized public int getLastCommandPerformed() {
-		System.out.println("last performed: " + last_command_performed);
+		// System.out.println("last performed: " + last_command_performed);
 		return last_command_performed;
 	}
 	
