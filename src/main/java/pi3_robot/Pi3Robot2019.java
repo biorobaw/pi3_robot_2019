@@ -3,6 +3,8 @@ package pi3_robot;
 import java.net.Inet4Address;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.Scanner;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -21,6 +23,7 @@ import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
+import pi3_robot.modules.CameraNavigationModule;
 import pi3_robot_2019.RunFunction;
 import pi3_robot_2019.RunFunctionRequest;
 import pi3_robot_2019.RunFunctionResponse;
@@ -54,27 +57,63 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 		// add desired modules
 		robot.initDistanceSensors(true);
 		robot.initCamera(true);
+		var navigationModule = robot.initCameraNavigationModule();
 		
 		// test camera module
-		var frame = robot.getLatestFrame();
-		Imgcodecs.imwrite("D:\\Desktop\\img.jpg", frame.frame);
+//		var frame = robot.getLatestFrame();
+//		Imgcodecs.imwrite("D:\\Desktop\\img.jpg", frame.frame);
+		
+		
+		Scanner in = new Scanner(System.in); 
 		
 		// test set speeds and distance sensing modules
 		int i = 0;
 		while (true) {
-			var d = robot.getDistance();
-			System.out.println("distances: " +d[0] + "," + d[1]+ " " + d[2] );
-			robot.setSpeed((float) 0.0, 0);
-			i = (i + 1) % 10;
-//					System.out.println("sending "+i);
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+//			var d = robot.getDistance();
+//			System.out.println("distances: " +d[0] + "," + d[1]+ " " + d[2] );
+//			robot.setSpeed((float) 0.0, 0);
+//			i = (i + 1) % 10;
+////					System.out.println("sending "+i);
+			
+			System.out.println();
+			System.out.print("Enter command:");
+			var cmd = in.nextLine();
+			var tokens = cmd.split(" ");
+			
+			switch(tokens[0]) {
+			
+				case "feeder":
+					if (tokens.length > 1) {
+						var next_command = Integer.parseInt(tokens[1]);
+						navigationModule.send_command(next_command);
+						while(navigationModule.getLastCommandPerformed()!=next_command)
+							wait(100);
+					}
+					break;
+				case "reset":
+					navigationModule.reset_commads();
+					break;
+				case "exit":
+					System.out.println("exit successful!");
+					System.exit(0);
+			
 			}
+			
+			wait(100);
+			
+			
+			
 		}
 
+	}
+	
+	static void wait(int ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	// =========================================================================================
@@ -133,7 +172,7 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 	 * @param block Indicates whether to block until frames are received
 	 */
 	public void initCamera(boolean block) {
-		subscribeToCamera(getRobotName()+"_cam/image/compressed", block);
+		subscribeToCamera("/pi3_robot_2019/" + robotId + "/cam/image/compressed", block);
 	}
 
 	/**
@@ -163,7 +202,7 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 	 * @param block indicates whether to block until packages are
 	 */
 	void initDistanceSensors(boolean block) {
-		subscribeToDistanceSensor(getRobotName() + "/d_data", block);
+		subscribeToDistanceSensor("/pi3_robot_2019/" + robotId + "/distance_sensors/d_data", block);
 	}
 	
 	
@@ -177,6 +216,21 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 		return distanceSensorData;
 	}
 
+	/**
+	 * initialzes the camera navigation module
+	 */
+	public CameraNavigationModule initCameraNavigationModule() {
+		if(cameraNavigationModule == null)
+			cameraNavigationModule = new CameraNavigationModule(robotId, connectedNode);
+		return cameraNavigationModule;
+	}
+	
+	public CameraNavigationModule getCameraNavigationModule() {
+		return cameraNavigationModule;
+	}
+	
+	
+	
 	// =========================================================================================
 	// ============================ PRIVATE FIELD AND METHODS ==================================
 	// =========================================================================================
@@ -191,6 +245,7 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 	ConnectedNode connectedNode = null;
 	private ServiceClient<RunFunctionRequest, RunFunctionResponse> runFunctionClient = null;
 	private Publisher<geometry_msgs.Twist> speed_vw_publisher;
+	private CameraNavigationModule cameraNavigationModule = null;
 
 	// ================ COMMUNICATION WITH ROS ===========================
 
@@ -199,7 +254,7 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 	 * Return the name of the robot for defining ros node/topic names
 	 */
 	private String getRobotName() {
-		return "pi3_robot_2019_" + robotId;
+		return "/pi3_robot_2019/" + robotId;
 	}
 	
 	/**
@@ -208,7 +263,7 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 	@Override
 	public GraphName getDefaultNodeName() {
 		// TODO Auto-generated method stub
-		return GraphName.of(getRobotName() + "_java");
+		return GraphName.of(getRobotName() + "/java");
 	}
 
 	/**
@@ -250,10 +305,10 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 		try {
 			
 			System.out.print("Pi3Robot: starting run function client...");
-			runFunctionClient = connectedNode.newServiceClient(getRobotName()+"/run_function", RunFunction._TYPE);
+			runFunctionClient = connectedNode.newServiceClient("/pi3_robot_2019/" + robotId + "/run_function", RunFunction._TYPE);
 			System.out.println(" done.");
 			System.out.print("Pi3Robot: starting run function client...");
-			speed_vw_publisher = connectedNode.newPublisher(getRobotName() + "/speed_vw", geometry_msgs.Twist._TYPE);
+			speed_vw_publisher = connectedNode.newPublisher("/pi3_robot_2019/" + robotId + "/speed_vw", geometry_msgs.Twist._TYPE);
 			System.out.println(" done.");
 			this.connectedNode = connectedNode;
 			
