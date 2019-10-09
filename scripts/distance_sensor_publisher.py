@@ -42,8 +42,8 @@ def on_shutdown():
 	MySensors.exitSensors()
 
 if __name__ == '__main__':
-	print(os.environ['ROS_IP'])
-	print(os.environ['ROS_MASTER_URI'])
+	# print(os.environ['ROS_IP'])
+	# print(os.environ['ROS_MASTER_URI'])
 	# get robot id
 	try:
 		robot_id = json.load(open(driver_folder + '/robot_id.json','rb'))
@@ -52,13 +52,13 @@ if __name__ == '__main__':
 		exit(-1)
 	
 	try:
-		#init node, sensors and then setuo clean up function
-		rospy.init_node(robot_ros_name()+'_d_sensors')
+		#init node, sensors and then setup clean up function
+		rospy.init_node('distance_sensors')
 		MySensors.initSensors()
 		rospy.on_shutdown(on_shutdown)
 		
 		# create publisher, then publish at given rate
-		sensor_publisher = rospy.Publisher(robot_ros_name()+'/d_data',
+		sensor_publisher = rospy.Publisher('~d_data',
 						    Float32MultiArray,queue_size=1)
 		para_rate = int(rospy.get_param('~rate','50'))
 		print('publishing rate: ',para_rate)

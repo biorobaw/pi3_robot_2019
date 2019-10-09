@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
 # This file implements the main controller for the robot.
-# The file creates a ros node: /pi3_robot_2019_{ROBOT_ID}_robot
+# It should not be called directly, instead use the launch file
+# The file creates a ros node: /pi3_robot_2019/{ROBOT_ID}
 # The file creates the following:
 # Service Servers:
-# 	/pi3_robot_2019_{ROBOT_ID}}/run_function : pi3_robot_2019/RunFunction
+# 	/pi3_robot_2019/{ROBOT_ID}}/run_function : pi3_robot_2019/RunFunction
 #		execute the function specified in the message
 #		see variable function_map for list of possible functions
 #		currently used to start subservices
 # Subscribers:
-#   /pi3_robot_2019_{ROBOT_ID}/speed_vw : geometry_msgs/Twist
+#   /pi3_robot_2019/{ROBOT_ID}/speed_vw : geometry_msgs/Twist
 #		sets the speeds of the robot according to the desired (v,w)
 
 
@@ -29,10 +30,6 @@ import json
 
 
 # ================= BASIC SERVICES ====================================
-
-# name of the robot node
-def robot_ros_name():
-	return 'pi3_robot_2019_'+robot_id
 
 # call back function for speed_vw subscriber
 def set_speeds_vw(twist):
@@ -71,7 +68,8 @@ def init_distance_sensors(params):
 			"rosrun",
 			"pi3_robot_2019",
 			"distance_sensor_publisher.py",
-			"_rate:=" + rate
+			"_rate:=" + rate,
+			"__ns:=" + rospy.get_name()
 		])
 	return 'ok'
 			
@@ -83,8 +81,17 @@ def init_camera(params):
 		camera = subprocess.Popen([
 			"rosrun",
 			"raspicam_node",	# google raspicam_node for details
-			"raspicam_node"
-			,"__name:="+robot_ros_name()+'_cam'
+			"raspicam_node",
+			"_width:=320",
+			"_height:=240",
+			"_framerate:=30", #actual framerate is 1/3 chosen value
+			"_quality:=100",
+			"_ISO:=200",
+			"_shutter_speed:=100000",
+			"_saturation:=50",
+			"_awb_mode:=horizon",
+			"__ns:="+rospy.get_name(),
+			"__name:=cam"
 		])
 	return 'ok'
 
@@ -108,22 +115,22 @@ if __name__ == '__main__':
 	
 	try:
 		# init node and stop servos, then set shutdown cleanup function
-		print('Createing node...')
-		rospy.init_node(robot_ros_name()+'_robot')
+		print('Creating node...')
+		rospy.init_node(robot_id)
 		MyServos.setSpeeds(0,0)
 		rospy.on_shutdown(on_shutdown)
 		print('node created')
 		
 		# init subscribers:
 		print('creating speed_vw subscriber...')
-		rospy.Subscriber(robot_ros_name()+"/speed_vw",
+		rospy.Subscriber("~speed_vw",
 						 Twist,
 						 set_speeds_vw)
 		print('Subscriber created')
 
 		print('creating service run_function...')
 		# init services:
-		rospy.Service(robot_ros_name()+"/run_function",
+		rospy.Service("~run_function",
 					  RunFunction,
 					  handle_run_function)
 		print('Service Created')
@@ -131,6 +138,8 @@ if __name__ == '__main__':
 		
 		# spin until shutdown
 		print('Waiting for commands...')
+		init_camera(None)
+		init_distance_sensors(['10'])
 		rospy.spin()
 		print('Shutting down')
 
