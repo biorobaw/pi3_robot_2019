@@ -201,7 +201,7 @@ public class Pi3Robot2019 extends AbstractNodeMain {
 	 * Subscribes to the robot sensor messages
 	 * @param block indicates whether to block until packages are
 	 */
-	void initDistanceSensors(boolean block) {
+	public void initDistanceSensors(boolean block) {
 		subscribeToDistanceSensor("/pi3_robot_2019/" + robotId + "/distance_sensors/d_data", block);
 	}
 	
