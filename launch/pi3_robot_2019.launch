@@ -1,9 +1,0 @@
-<launch>
-
-
-    <group ns="pi3_robot_2019">
-        <node pkg="pi3_robot_2019" name="r1" type="main_controller.py" output="screen"/>
-    </group>
-
-
-</launch>
