@@ -56,20 +56,32 @@ def setSpeeds(l_input, r_input):
     pwm.set_pwm(LEFT_SERVO, 0, servo_stop + l_input)
     pwm.set_pwm(RIGHT_SERVO, 0, servo_stop - r_input)
 
-def setSpeedsRPS(l_input, r_input):
-    left_index = 0
-    right_index = 0
-    for i in range(len(leftSpeedmap)):
-        if leftSpeedmap[i] <= l_input:
-            left_index = i
-        if rightSpeedmap[i] <= r_input:
-            right_index = i
+def approximage(value, table):
+    length = len(table)
+    left_bound = -1
+    while left_bound < length -1 and table[left_bound+1] < value:
+        left_bound +=1
+    if left_bound == -1:
+        left_bound = 0
+    elif left_bound < length-1:
+        mid_value = (table[left_bound]+table[left_bound+1])/2
+        if value > mid_value:
+            left_bound+=1
+    return left_bound
 
+def setSpeedsRPS(l_input, r_input):
+    left_index = approximage(l_input,leftSpeedmap)
+    right_index = approximage(r_input,rightSpeedmap)
+    
     #print("setSpeeds(%d, %d)" %(left_index, right_index))
     setSpeeds(-MAX_INPUT + left_index, -MAX_INPUT + right_index)
 
 def setSpeedsIPS(l_input, r_input):
     setSpeedsRPS(l_input/8.2, r_input/8.2)
+
+def setSpeedsVW_IPS(v, w):
+    setSpeedsIPS(v-(w*2.1), v+(w*2.1))
+
     
 # sets the speeds in meters per second:
 def setSpeedsMPS(l_input, r_input):
@@ -134,7 +146,8 @@ def loadCalibration():
      
 loadCalibration()
 
-print()
+print(leftSpeedmap)
+print(rightSpeedmap)
       
 if __name__ == '__main__':
     raw_input("press enter to calibrate...")
