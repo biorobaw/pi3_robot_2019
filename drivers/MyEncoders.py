@@ -4,21 +4,49 @@
 # wheel encoders
 import RPi.GPIO as GPIO
 import time
+import rospy
+from threading import Thread, Lock
 import os
 
+mutex = Lock()
 LEFT_ENCODER  = 18
 RIGHT_ENCODER = 17
 counts = [0,0]
+delta_T = [0,0]
+time_stamp = [0,0]
+
 
 
 # seems to me that
 # this function is triggered when an event is detected from either encoder
 def iencoder(channel):
+  global counts,delta_T,time_stamp
   # increment the count of the respective encoder by 1
-  if channel == 18:
-    counts[0] += 1
-  if channel == 17:
-    counts[1] += 1
+  time = rospy.get_time()
+  id = channel-17
+  mutex.acquire()
+  counts[id] += 1
+  delta_T[id] = time - time_stamp[id]
+  time_stamp[id] = time
+  mutex.release()
+
+
+#def getCounts():
+#    mutex.aqcuire()
+#    res = [copy values]
+#    mutex.release()
+#    return res
+    
+def getInstantaneousSpeed():
+    time_now = rospy.get_time()
+    mutex.acquire()
+    c = [counts[0], counts[1]]
+    delta = [delta_T[0],delta_T[1]]
+    stamps = [time_stamp[0],time_stamp[1]]
+    mutex.release()
+    return [1/max(time_now - stamps[0], delta[0]), 1/max(time_now - stamps[1], delta[1])]
+    
+    return res
 
 # Setup the GPIO pins for both encoders
 GPIO.setmode(GPIO.BCM)

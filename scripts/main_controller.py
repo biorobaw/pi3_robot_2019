@@ -22,10 +22,19 @@ from geometry_msgs.msg import Twist
 driver_folder = "/home/pi/catkin_ws/src/pi3_robot_2019/drivers"
 sys.path.append(os.path.abspath(driver_folder))
 import MyServos
+import MyEncoders
+import MySensors
 import subprocess
 from pi3_robot_2019.srv import RunFunction
 from pi3_robot_2019.srv import RunFunctionRequest
 from pi3_robot_2019.srv import RunFunctionResponse
+from pi3_robot_2019.srv import GetEncoder
+from pi3_robot_2019.srv import GetEncoderRequest
+from pi3_robot_2019.srv import GetEncoderResponse
+from pi3_robot_2019.srv import GetSpeeds
+from pi3_robot_2019.srv import GetSpeedsRequest
+from pi3_robot_2019.srv import GetSpeedsResponse
+
 import json
 
 
@@ -33,8 +42,8 @@ import json
 
 # call back function for speed_vw subscriber
 def set_speeds_vw(twist):
-  # rospy.loginfo("speed vw: {:.3f}   {:.3f}".format(twist.linear.x, twist.angular.z) )
-  MyServos.setSpeedsVW_MPS(twist.linear.x, twist.angular.z) 
+  rospy.loginfo("speed vw: {:.3f}   {:.3f}".format(twist.linear.x, twist.angular.z) )
+  MyServos.setSpeedsVW_IPS(twist.linear.x, twist.angular.z) 
   
 # call back fuction implementing run_function service routine
 def handle_run_function(request):
@@ -51,6 +60,17 @@ def on_shutdown():
 		distance_sensors.terminate()
 	MyServos.setSpeeds(0,0)
 
+
+# ================ RUN GET ENCODER FUNCTIONS =====================
+def handle_get_encoder(self):
+	counts = MyEncoders.counts
+	return GetEncoderResponse(counts)
+
+def handle_get_speeds(self):
+	ret = MyEncoders.getInstantaneousSpeed()
+	return GetSpeedsResponse(ret)
+
+
 # ================ RUN FUNCTION SERVICE FUNCTIONS =====================
 
 	
@@ -58,10 +78,12 @@ def on_shutdown():
 distance_sensors = None
 def init_distance_sensors(params):
 	global distance_sensors
+	print ("\ninit sensors\n")
 	if distance_sensors==None:
 		
 		# get rate from params (default = 20)
 		print ('params', params)
+		print ("\ninit sensors\n")
 		rate = params[0] if len(params)>0 else '20'
 		
 		distance_sensors = subprocess.Popen([
@@ -71,6 +93,8 @@ def init_distance_sensors(params):
 			"_rate:=" + rate,
 			"__ns:=" + rospy.get_name()
 		])
+	else:
+		print("ELSE")
 	return 'ok'
 			
 # function to start the camera
@@ -134,6 +158,13 @@ if __name__ == '__main__':
 					  RunFunction,
 					  handle_run_function)
 		print('Service Created')
+		rospy.Service("~get_encoder",
+					  GetEncoder,
+					  handle_get_encoder)
+
+		rospy.Service("~get_speeds",
+					  GetSpeeds,
+					  handle_get_speeds)
 		
 		
 		# spin until shutdown
