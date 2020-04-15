@@ -96,6 +96,30 @@ def Forward(X, Y):
     SetSpeeds.setspeeds(0,0)
     print("Time: " + str(TIME))
 
+def Orientation(Degrees, Seconds, rate): 
+    #linSpeed = X/Y
+    #rate = rospy.Rate(10)
+    SetSpeeds.setspeedsvw(0,Degrees*math.pi/(180*Seconds))
+    
+    c = 2*math.pi*(width/2) * (Degrees*1.00/360)*(32/circumference) #circumference of circle times how many rotations
+    encod =  get_encoder().result                              #times how many inches per tick
+    lInit = encod[0] # GET INITIAL ENCODER VALUES
+    rInit = encod[1]
+    l=0
+    r=0
+    
+    TIME = rospy.get_time()
+    while (r-rInit<c and l-lInit<c):
+        encod =  get_encoder().result
+        l = encod[0]
+        r = encod[1]
+        rate.sleep()
+    TIME = rospy.get_time() - TIME
+    SetSpeeds.setspeeds(0,0)
+    print(r-rInit)
+    print(l-lInit)
+    print(c)
+    print("Time: " + str(TIME))
    
     
     
