@@ -7,16 +7,33 @@ import rospy
 import cv2
 import SetSpeeds
 import numpy as np
+from std_msgs.msg import Int8MultiArray
 from std_msgs.msg import String
+import Lab4Grid
+
+from std_msgs.msg import MultiArrayLayout
+from std_msgs.msg import MultiArrayDimension
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 from threading import Thread, Lock
+import threading
 FPS_SMOOTHING = 0.9
 mutex = Lock()
+
+from Tkinter import *
 # Window names
 WINDOW1 = "Adjustable Mask - Press Esc to quit"
 WINDOW2 = "Detected Blobs - Press Esc to quit"
+maze = [[0, 1, 1, 0, 1, -1], [0, 1, 0, 0, 0, -1], [0, 1, 0, 0, 0,-1],[0, 1, 1, 0, 0, -1], #starting grid
+            [0, 0, 0, 0, 1, -1], [0, 0, 0, 0, 0, -1], [0, 0, 0, 0, 0, -1],[0, 0, 1, 0, 0, -1],
+            [0, 0, 0, 0, 1, -1], [0, 0, 0, 0, 0, -1], [0, 0, 0, 0, 0, -1],[0, 0, 1, 0, 0, -1],
+            [0, 0, 0, 1, 1, -1], [0, 0, 0, 1, 0, -1], [0, 0, 0, 1, 0, -1],[0, 0, 1, 1, 0, -1]]
+
+maze2 = [[0, 1, 1, 1, 1, -1], [0, 1, 0, 0, 0, -1], [0, 1, 0, 0, 0,-1],[0, 1, 1, 0, 0, -1], #starting grid
+            [0, 1, 1, 1, 1, -1], [0, 0, 0, 0, 0, -1], [0, 0, 0, 0, 0, -1],[0, 0, 1, 0, 0, -1],
+            [0, 0, 0, 0, 1, -1], [0, 0, 0, 0, 0, -1], [0, 0, 0, 0, 0, -1],[0, 0, 1, 0, 0, -1],
+            [0, 0, 0, 1, 1, -1], [0, 0, 0, 1, 0, -1], [0, 0, 0, 1, 0, -1],[0, 0, 1, 1, 0, -1]]
 
 # Default HSV ranges
 # Note: the range for hue is 0-180, not 0-255
@@ -207,6 +224,69 @@ def faceForward(ic):
     
     SetSpeeds.setspeeds(0, 0)
         
+        
+def Task2(rospy):
+    #rospy.init_node('Task2', anonymous=True)
+    #rate = rospy.Rate(10)
+    #pub = rospy.Publisher('/Grid', Int8MultiArray, queue_size=0, latch = True)
+    #msg = Int8MultiArray()
+    
+    #msg.layout.dim = [MultiArrayDimension(), MultiArrayDimension()]
+    
+    #msg.layout.data_offset = 0
+    #dim = MultiArrayDimension()
+    
+    #msg.layout.dim[0].label = 'rows'
+    #msg.layout.dim[0].size = 16
+    #msg.layout.dim[0].stride = 96
+    #msg.layout.dim[1].label = 'columns'
+    #msg.layout.dim[1].size = 6
+    #msg.layout.dim[1].stride = 6    
+    #msg.data = np.reshape(maze,[96])
+   
+    print("sending")
+    #for i in range(100):
+    #    pub.publish(msg)
+    #while not rospy.is_shutdown():
+    #    pub.publish(msg)
+    #    rate.sleep()
+        
+    #pub.publish(msg)
+    #rate.sleep()
+    #pub.publish(msg)
+    #print("sent")
+        
+    #return msg
+    
+    #t = threading.Thread(target=startGridGUI)
+    #t.daemon = True
+    #t.start()
+    root2 = Tk()
+    app2 = Lab4Grid.Application(master=root2)
+    #app2.mainloop()
+    app2.update_idletasks()
+    app2.update()
+
+    print("blah")
+    #while not rospy.is_shutdown():
+    #    pass
+    #t.join()
+    print("blah")
+    
+    while not rospy.is_shutdown():
+        app2.maze = maze2
+        app2.updateGrid()
+        app2.update_idletasks()
+        app2.update()
+        rospy.sleep(1)
+    
+    return
+
+def startGridGUI():
+    pass
+    
+    
+    
 
 
         
