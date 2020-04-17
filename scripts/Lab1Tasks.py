@@ -23,60 +23,8 @@ diameter = 2.55
 width = 4.2
 circumference = 2*math.pi*(diameter/2) #circumference for 2.55 is 8.0110612
 
-def SShape(R1, R2, Y):
-    halfcircum1 = R1*math.pi
-    halfcircum2 = R2*math.pi
     
-    V1 = (halfcircum1+halfcircum2)/Y
-    W1= -V1/R1
-    W2= V1/R2
-    
-    c1 = abs((halfcircum1+2.1)*32/circumference)
-    c2 = abs((halfcircum1-2.1)*32/circumference)
-    
-    encod =  get_encoder().result
-    lInit = encod[0] # GET INITIAL ENCODER VALUES
-    rInit = encod[1]
-    
-    l=0
-    r=0
-    print("V: "+str(V1) +"W: " +str(W1))
-    SetSpeeds.setspeedsvw(V1,W1)
-    print("speedsset")
-    TIME = rospy.get_time()    
-    while (r-rInit<c2 and l-lInit<c1):
-        encod =  get_encoder().result
-        l = encod[0]
-        r = encod[1]
-                
-    print(r-rInit)
-    print("c2: "+str(c2))
-    print(l-lInit)
-    print("c1: "+str(c1))
-    
-    lInit = encod[0] # GET INITIAL ENCODER VALUES
-    rInit = encod[1]
-    l=0
-    r=0
-        
-    c1 = abs((halfcircum2+2.1)*32/circumference)
-    c2 = abs((halfcircum2-2.1)*32/circumference)
-    print("V: "+str(V1) +"W: " +str(W2))
-    
-    SetSpeeds.setspeedsvw(V1, W2)
-    while (r-rInit<c1 and l-lInit<c2):
-        encod =  get_encoder().result
-        l = encod[0]
-        r = encod[1]   
-    TIME = rospy.get_time() - TIME
-    SetSpeeds.setspeedsvw(0,0)
-    print("TIME: " +str(TIME)) 
-    print(r-rInit)
-    print("c1: "+str(c1))
-    print(l-lInit)
-    print("c2: "+str(c2))
-    
-def Forward(X, Y): 
+def Distance(X, Y): 
     linSpeed = X/Y
     SetSpeeds.setspeeds(linSpeed,linSpeed)
     
@@ -96,12 +44,12 @@ def Forward(X, Y):
     SetSpeeds.setspeeds(0,0)
     print("Time: " + str(TIME))
 
-def Orientation(Degrees, Seconds, rate): 
+def Orientation(Degrees, Seconds): 
     #linSpeed = X/Y
-    #rate = rospy.Rate(10)
+    rate = rospy.Rate(10)
     SetSpeeds.setspeedsvw(0,Degrees*math.pi/(180*Seconds))
     
-    c = 2*math.pi*(width/2) * (Degrees*1.00/360)*(32/circumference) #circumference of circle times how many rotations
+    c = 2*math.pi*(width/2) * (abs(Degrees)*1.00/360)*(32/circumference) #circumference of circle times how many rotations
     encod =  get_encoder().result                              #times how many inches per tick
     lInit = encod[0] # GET INITIAL ENCODER VALUES
     rInit = encod[1]
@@ -120,7 +68,99 @@ def Orientation(Degrees, Seconds, rate):
     print(l-lInit)
     print(c)
     print("Time: " + str(TIME))
+
+
+def Task4(H, W, Y):
+    speed = 2*(H+W)/Y
+    if(speed>6):
+        print("Higher than max speed")
+        return
+       
+    
+    encod =  get_encoder().result
+    lInit = encod[0] # GET INITIAL ENCODER VALUES
+    rInit = encod[1]
+    
+    l=0
+    r=0
+    SetSpeeds.setspeeds(speed,speed)
+    TIME = rospy.get_time()
+    print((r-rInit)*32.0/circumference)
+    while ((r-rInit)*circumference/32<H and (l-lInit)*circumference/32<H):
+        encod =  get_encoder().result
+        l = encod[0]
+        r = encod[1]
+    
+    Orientation(-90,2)
+    
+    lInit = encod[0] # GET INITIAL ENCODER VALUES
+    rInit = encod[1]
+ 
+        
+    SetSpeeds.setspeeds(speed, speed)
+    while ((r-rInit)*circumference/32<W and (l-lInit)*circumference/32<W):
+        encod =  get_encoder().result
+        l = encod[0]
+        r = encod[1]
+    
+    Orientation(-90,2)
+    lInit = encod[0] # GET INITIAL ENCODER VALUES
+    rInit = encod[1]
+  
+    SetSpeeds.setspeeds(speed, speed)
+    while ((r-rInit)*circumference/32<H and (l-lInit)*circumference/32<H):
+        encod =  get_encoder().result
+        l = encod[0]
+        r = encod[1]
+    
+    Orientation(-90,2)
+    
+    lInit = encod[0] # GET INITIAL ENCODER VALUES
+    rInit = encod[1]
+    l=0
+    r=0
+        
+    SetSpeeds.setspeeds(speed, speed)
+    while ((r-rInit)*circumference/32<W and (l-lInit)*circumference/32<W):
+        encod =  get_encoder().result
+        l = encod[0]
+        r = encod[1]   
+    TIME = rospy.get_time() - TIME
+    SetSpeeds.setspeedsvw(0,0)
+    print("TIME: " +str(TIME)) 
+
    
+   
+def Circle(R, Y):
+    halfcircum = R*math.pi
+    V = (halfcircum)/Y
+    W= -V/R
+
+    
+    c1 = abs((halfcircum+2.1)*32/circumference)
+    c2 = abs((halfcircum-2.1)*32/circumference)
+    
+    encod =  get_encoder().result
+    lInit = encod[0] # GET INITIAL ENCODER VALUES
+    rInit = encod[1]
+    
+    l=0
+    r=0
+    print("V: "+str(V) +"W: " +str(W))
+    SetSpeeds.setspeedsvw(V,W)
+    TIME = rospy.get_time()    
+    while (r-rInit<c2 and l-lInit<c1):
+        encod =  get_encoder().result
+        l = encod[0]
+        r = encod[1]
+   
+    TIME = rospy.get_time() - TIME
+    SetSpeeds.setspeedsvw(0,0)
+    print("TIME: " +str(TIME)) 
+    print(r-rInit)
+    print("c1: "+str(c1))
+    print(l-lInit)
+    print("c2: "+str(c2))
     
     
     

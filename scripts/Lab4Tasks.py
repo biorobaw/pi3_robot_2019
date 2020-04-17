@@ -25,7 +25,7 @@ from Tkinter import *
 # Window names
 WINDOW1 = "Adjustable Mask - Press Esc to quit"
 WINDOW2 = "Detected Blobs - Press Esc to quit"
-maze = [[0, 1, 1, 0, 1, -1], [0, 1, 0, 0, 0, -1], [0, 1, 0, 0, 0,-1],[0, 1, 1, 0, 0, -1], #starting grid
+maze1 = [[0, 1, 1, 0, 1, -1], [0, 1, 0, 0, 0, -1], [0, 1, 0, 0, 0,-1],[0, 1, 1, 0, 0, -1], #starting grid
             [0, 0, 0, 0, 1, -1], [0, 0, 0, 0, 0, -1], [0, 0, 0, 0, 0, -1],[0, 0, 1, 0, 0, -1],
             [0, 0, 0, 0, 1, -1], [0, 0, 0, 0, 0, -1], [0, 0, 0, 0, 0, -1],[0, 0, 1, 0, 0, -1],
             [0, 0, 0, 1, 1, -1], [0, 0, 0, 1, 0, -1], [0, 0, 0, 1, 0, -1],[0, 0, 1, 1, 0, -1]]
@@ -226,59 +226,24 @@ def faceForward(ic):
         
         
 def Task2(rospy):
-    #rospy.init_node('Task2', anonymous=True)
-    #rate = rospy.Rate(10)
-    #pub = rospy.Publisher('/Grid', Int8MultiArray, queue_size=0, latch = True)
-    #msg = Int8MultiArray()
-    
-    #msg.layout.dim = [MultiArrayDimension(), MultiArrayDimension()]
-    
-    #msg.layout.data_offset = 0
-    #dim = MultiArrayDimension()
-    
-    #msg.layout.dim[0].label = 'rows'
-    #msg.layout.dim[0].size = 16
-    #msg.layout.dim[0].stride = 96
-    #msg.layout.dim[1].label = 'columns'
-    #msg.layout.dim[1].size = 6
-    #msg.layout.dim[1].stride = 6    
-    #msg.data = np.reshape(maze,[96])
-   
-    print("sending")
-    #for i in range(100):
-    #    pub.publish(msg)
-    #while not rospy.is_shutdown():
-    #    pub.publish(msg)
-    #    rate.sleep()
-        
-    #pub.publish(msg)
-    #rate.sleep()
-    #pub.publish(msg)
-    #print("sent")
-        
-    #return msg
-    
-    #t = threading.Thread(target=startGridGUI)
-    #t.daemon = True
-    #t.start()
     root2 = Tk()
     app2 = Lab4Grid.Application(master=root2)
-    #app2.mainloop()
     app2.update_idletasks()
     app2.update()
 
     print("blah")
-    #while not rospy.is_shutdown():
-    #    pass
-    #t.join()
+  
     print("blah")
-    
+    i = 0
     while not rospy.is_shutdown():
-        app2.maze = maze2
+        app2.maze = maze1
+        if(i%2):
+            app2.maze = maze2
         app2.updateGrid()
         app2.update_idletasks()
         app2.update()
         rospy.sleep(1)
+        i= i +1
     
     return
 
