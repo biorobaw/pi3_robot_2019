@@ -245,7 +245,7 @@ class Task5_GUI(Frame):
         self.R1_var.set(0)
         # tell the entry widget to watch this variable
         self.R1_cont["textvariable"] = self.R1_var
-        
+
         self.Y_cont = Entry()
         self.Y_cont.pack()
         self.Y_cont.pack(ipadx=200)

@@ -21,26 +21,35 @@ rate = rospy.Rate(10) # 10hz
 def on_shutdown():
     rospy.loginfo("Shutting down")
     SetSpeeds.setspeeds(0,0)
-    rate.sleep()
-    rate.sleep()
+
     rate.sleep()
     
 class Application(Frame):
     function = ""
     def Task2(self):
-        self.function = "t2"
+        self.function = "Task2"
         self.quit()
-        
+    def Task3(self):
+        self.function = "Task3"
+        self.quit()
     def createWidgets(self):
-        self.T2 = Button(self)
-        self.T2["text"] = "T2"
-        self.T2["fg"]   = "red"
-        
+        self.QUIT = Button(self)
+        self.QUIT["text"] = "QUIT    \n"
+        self.QUIT["fg"]   = "red"
+        self.QUIT["command"] =  self.quit
+        self.QUIT.grid(row=0, column=0,ipadx=150, ipady=150, sticky="ew")
 
-        self.T2.pack({"side": "left"})
-        self.T2.pack(ipadx=200)
-        self.T2.pack(ipady=200)
+        
+        self.T2 = Button(self)
+        self.T2["text"] = "Task2\n(PID)"
+        self.T2.grid(row=0, column=1,ipadx=150, ipady=150, sticky="ew")
         self.T2["command"] =  self.Task2
+        
+        self.T3 = Button(self)
+        self.T3["text"] = "Task3\n(Wall Following)"
+        self.T3.grid(row=0, column=2,ipadx=150, ipady=150, sticky="ew")
+
+        self.T3["command"] =  self.Task3
  
 
     def __init__(self, master=None):
@@ -56,9 +65,12 @@ if __name__ == '__main__':
         app = Application(master=root)
         app.mainloop()
         root.destroy()
-        if(app.function=="t2"):
-            print("t2")
-            Lab2Tasks.wallfollow1(rospy)
+        if(app.function=="Task2"):
+            print("Task2")
+            Lab2Tasks.Task2()
+        elif(app.function=="Task3"):
+            print("Task2")
+            Lab2Tasks.Task3()
         
     except rospy.ROSInterruptException:
         rospy.loginfo("InteruptException")

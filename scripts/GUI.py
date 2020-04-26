@@ -14,6 +14,7 @@ from robot_client.srv import GetSpeedsResponse
 from robot_client.srv import RunFunction
 from robot_client.srv import RunFunctionRequest
 from robot_client.srv import RunFunctionResponse
+import SetSpeeds
 
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import MultiArrayLayout
@@ -132,11 +133,27 @@ class Application(Frame):
         self.speed_widget["command"] = self.set_speed
         self.speed_widget.pack({"side": "right"})
         self.speed_widget.pack(ipadx=100)
+        
+        self.turnL_but = Button(self)
+        self.turnL_but["text"] = "Press to\nturn left\n90Degrees"
+        self.turnL_but["command"] = self.turnL
+        self.turnL_but.pack({"side": "top"})
+        self.turnL_but.pack(ipadx=50)
+        
+        self.turnR_but = Button(self)
+        self.turnR_but["text"] = "Press to\nturn Right\n90Degrees"
+        self.turnR_but["command"] = self.turnR
+        self.turnR_but.pack({"side": "top"})
+        self.turnR_but.pack(ipadx=50)
         #========================END SPEED NODE=========================
         
     def startEncoder(self):
         self.set_encoder()
-        self.encoder["command"] = self.reset 
+        self.encoder["command"] = self.reset
+    def turnR(self):
+        Turn(90)
+    def turnL(self):
+        Turn(-90) 
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.pack()
@@ -188,7 +205,29 @@ class Application(Frame):
       
       
       
-      
+def Turn(Degrees): 
+    rate = rospy.Rate(10) 
+    c = 2*math.pi*(width/2) * (abs(Degrees)*1.00/360)*(32/8.0110612) 
+    encod =  get_encoder().result                              #times how many inches per tick
+    lInit = encod[0] # GET INITIAL ENCODER VALUES
+    rInit = encod[1]
+    l=0
+    r=0
+    maxSpeed=3
+    while (r-rInit<c or l-lInit<c):
+        encod =  get_encoder().result
+        l = encod[0]
+        r = encod[1]
+        satSpeed = c - ((r-rInit)*(circumference/32))
+        satSpeed = satSpeed*.25
+        if satSpeed>maxSpeed:
+            satSpeed=maxSpeed
+        if(Degrees>0):
+            SetSpeeds.setspeeds(satSpeed,-1*satSpeed)
+        else:
+            SetSpeeds.setspeeds(-1*satSpeed,satSpeed)
+        rate.sleep()
+    SetSpeeds.setspeeds(0,0)  
       
 def on_shutdown():
     rospy.loginfo("Shutting down")

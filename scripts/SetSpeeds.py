@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-import time
 import math
 from geometry_msgs.msg import Twist
-from std_msgs.msg import String
 
 
 
 
 #============================Creates publisher to send speeds=================
-#rospy.init_node('lab2', anonymous=True)
 pub = rospy.Publisher('pi3_robot_2019/r1/speed_vw', Twist, queue_size=1, latch = True)
-#rate = rospy.Rate(10) # 10hz
 
 #=================Robot Dimensions==================================
 diameter = 2.55
@@ -24,8 +20,8 @@ speedvw = Twist()
  
   
 def setspeeds(l,r):
-        print(l)
-        print(r)
+        #print(l)
+        #print(r)
         speedvw.linear.x= (l+r)/2
         speedvw.angular.z=(r-l)/width
         pub.publish(speedvw)

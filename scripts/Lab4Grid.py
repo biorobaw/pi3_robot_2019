@@ -49,8 +49,11 @@ class Application(Frame):
             
             if(self.curcell ==i):
                 pngName += self.dir
+            if(self.maze[i][0]==0): #If cell is unvisited display the question mark tile instead. Feel 
+                pngName="0"         #free to comment this out instead.
+                
             pngName+=".png"
-            print(pngName)
+            #print(pngName)
             self.file[i] = PhotoImage(file="src/robot_client/scripts/grid_images/"+pngName)
             self.mazeGrid[i] = Label(self, text = i+1, compound=CENTER, image=self.file[i])
             self.mazeGrid[i].grid(row=i/4, column=i%4)
