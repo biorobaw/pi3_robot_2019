@@ -19,24 +19,6 @@ def on_shutdown():
     rospy.loginfo("Shutting down")
     SetSpeeds.setspeeds(0,0)
     rate.sleep()
-class image_converter:
-  mutex = Lock()
-  cv_image = cv2.imdecode(np.zeros((320,240,3), np.uint8),cv2.IMREAD_COLOR)
-  def __init__(self):
-    self.bridge = CvBridge()
-    self.image_sub = rospy.Subscriber("/pi3_robot_2019/r1/cam/image/compressed",CompressedImage,self.callback)
-
-  def callback(self,data):
-    try:  
-      np_arr = np.fromstring(data.data, np.uint8)
-      self.cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-      self.cv_image = cv2.flip(self.cv_image,-1)
-      if(self.mutex.locked()):
-          self.mutex.release()
-      
-    except CvBridgeError as e:
-      print(e)
-
 
 #==========================GUI STUFF================
 class Application(Frame):
@@ -80,7 +62,7 @@ class Application(Frame):
          
          
         self.T4 = Button(self)
-        self.T4["text"] = "Task3\n(Bug Algorithm)"
+        self.T4["text"] = "Task4\n(Bug Algorithm)"
         self.T4.grid(row=1, column=1,ipadx=150, ipady=150, sticky="ew")
 
         self.T4["command"] =  self.Task4
@@ -97,7 +79,6 @@ def main(args):
 if __name__ == '__main__':
     
     try:
-        ic = image_converter()
         rospy.init_node('image_converter', anonymous=True)
         rospy.on_shutdown(on_shutdown)
         rate = rospy.Rate(10) # 10hz
@@ -110,19 +91,23 @@ if __name__ == '__main__':
             pass
 
         elif(app.function =="Task1"):
-            Lab3Tasks.Task1(ic)
+            Lab3Tasks.Task1()
+            pass
         elif(app.function =="Task2"):
-            Lab3Tasks.Task2(ic)
+            Lab3Tasks.Task2()
+            pass
         elif(app.function =="Task3"):
-            Lab3Tasks.Task3(ic)
+            Lab3Tasks.Task3Main()
+            pass
         elif(app.function =="Task4"):
-            Lab3Tasks.Task4(ic)
-        
+            Lab3Tasks.Task4()
+            pass
         
     except rospy.ROSInterruptException:
         rospy.loginfo("InteruptException")
         on_shutdown()
     except Exception as e:
+        #print(e)
         on_shutdown()
         #pass
 

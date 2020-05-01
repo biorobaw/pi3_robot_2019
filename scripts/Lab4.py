@@ -13,25 +13,8 @@ from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 from threading import Thread, Lock
 from Tkinter import *
+import SetSpeeds
 
-
-class image_converter:
-  mutex = Lock()
-  cv_image = cv2.imdecode(np.zeros((320,240,3), np.uint8),cv2.IMREAD_COLOR)
-  def __init__(self):
-    self.bridge = CvBridge()
-    self.image_sub = rospy.Subscriber("/pi3_robot_2019/r1/cam/image/compressed",CompressedImage,self.callback)
-
-  def callback(self,data):
-    try:  
-      np_arr = np.fromstring(data.data, np.uint8)
-      self.cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-      self.cv_image = cv2.flip(self.cv_image,-1)
-      if(self.mutex.locked()):
-          self.mutex.release()
-      
-    except CvBridgeError as e:
-      print(e)
 
 
 #==========================GUI STUFF================
@@ -125,12 +108,13 @@ class Entry_GUI(Frame):
         
 def on_shutdown():
     rospy.loginfo("Shutting down")
+    SetSpeeds.setspeeds(0,0)
+    
     
     
 if __name__ == '__main__':
     try:
         rospy.on_shutdown(on_shutdown)
-        ic = image_converter()
         rospy.init_node('Lab4', anonymous=True)
         rate = rospy.Rate(10) # 10hz
 
@@ -146,7 +130,7 @@ if __name__ == '__main__':
             app2 = Entry_GUI(master=root2)
             app2.mainloop()
             root2.destroy()
-            Lab4Tasks.Task2(app2.curcell.get(),app2.dir)
+            Lab4Tasks.Task2Main(app2.curcell.get(),app2.dir)
     
     except rospy.ROSInterruptException:
         rospy.loginfo("InteruptException")

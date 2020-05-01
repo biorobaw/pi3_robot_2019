@@ -1,31 +1,8 @@
 #!/usr/bin/env python
 # license removed for brevity
-import rospy
-import time
-import math
-from geometry_msgs.msg import Twist
-from std_msgs.msg import String
-
-
-from std_msgs.msg import Int8MultiArray
-from std_msgs.msg import MultiArrayLayout
-from std_msgs.msg import MultiArrayDimension
-
-
 
 from Tkinter import *
 
-
-
-
-#============================Create subscriber to recieve grid info==============
-#rospy.init_node('lab4_grid', anonymous=True)
-
-#rate = rospy.Rate(10) # 10hz
-
-
-def round_sig(x, sig=3):
-    return round(x, sig-int(floor(log10(abs(x))))-1)
 
 
 
@@ -37,13 +14,32 @@ class Application(Frame):
             [0, 0, 0, 1, 1, -1], [0, 0, 0, 1, 0, -1], [0, 0, 0, 1, 0, -1],[0, 0, 1, 1, 0, -1]]
     mazeGrid = [None]*16
     file = [None]*16
-    curcell =4
+    curcell =-1
+    prevcell=-1
     dir = 'N'
 
     def createWidgets(self):     
-        self.updateGrid()
+        self.startGrid()
         
     def updateGrid(self):
+        pngName = str(self.maze[self.curcell][1]) + str(self.maze[self.curcell][2]) +str(self.maze[self.curcell][3]) +str(self.maze[self.curcell][4])
+        pngName += self.dir
+        pngName+=".png"
+        self.file[self.curcell] = PhotoImage(file="src/robot_client/scripts/grid_images/"+pngName)
+        self.mazeGrid[self.curcell] = Label(self, text = self.curcell+1, compound=CENTER, image=self.file[self.curcell])
+        self.mazeGrid[self.curcell].grid(row=self.curcell/4, column=self.curcell%4)
+        
+        if(self.prevcell!=-1 and self.prevcell!=self.curcell):
+            pngName = str(self.maze[self.prevcell][1]) + str(self.maze[self.prevcell][2]) +str(self.maze[self.prevcell][3]) +str(self.maze[self.prevcell][4])
+            pngName+=".png"
+            self.file[self.prevcell] = PhotoImage(file="src/robot_client/scripts/grid_images/"+pngName)
+            self.mazeGrid[self.prevcell] = Label(self, text = self.prevcell+1, compound=CENTER, image=self.file[self.prevcell])
+            self.mazeGrid[self.prevcell].grid(row=self.prevcell/4, column=self.prevcell%4)
+            
+        
+        self.prevcell=self.curcell
+        
+    def startGrid(self):
         for i in range(16):
             pngName = str(self.maze[i][1]) + str(self.maze[i][2]) +str(self.maze[i][3]) +str(self.maze[i][4])
             

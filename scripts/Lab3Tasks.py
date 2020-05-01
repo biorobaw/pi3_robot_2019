@@ -7,6 +7,7 @@ import rospy
 import cv2
 import SetSpeeds
 import Lab3Display
+import ImageConverter
 import numpy as np
 from std_msgs.msg import String
 from std_msgs.msg import Float32MultiArray
@@ -18,6 +19,9 @@ from cv_bridge import CvBridge, CvBridgeError
 from threading import Thread, Lock
 from Tkinter import *
 
+import threading
+
+quitFlag=0;
 global sense
 sense = (0.0, 0.0, 0.0) 
 
@@ -78,7 +82,9 @@ def onMaxVTrackbar(val):
     cv2.setTrackbarPos("Max Val", WINDOW1, maxV)
 
 
-def Task1(ic):
+def Task1():
+    ic = ImageConverter.image_converter()
+    ic.mutex.acquire()
     # Initialize the SimpleBlobDetector
     params = cv2.SimpleBlobDetector_Params()
     detector = cv2.SimpleBlobDetector_create(params)
@@ -197,7 +203,7 @@ def Task1(ic):
             for i in keypoints:
                 if i.size>largest.size:
                     largest = i
-            #print(largest.pt[0])     
+            print(largest.pt[0])     
             if(largest.pt[0]<200 and largest.pt[0]>100):
                 SetSpeeds.setspeeds(0, 0)
             elif(largest.pt[0] <100):
@@ -213,6 +219,7 @@ def Task1(ic):
             
             
         else:
+            print("hi")
             SetSpeeds.setspeeds(3, -3)
     
         # Check for user input
@@ -222,32 +229,70 @@ def Task1(ic):
     
     SetSpeeds.setspeeds(0, 0)
     
-def Task2(ic):
+def Task2():
     pass
-def Task3(ic):
+
+frame = None
+mask = None; frame_with_keypoints = None;
+newFrame = False
+quitFlag=0; finished = False
+def Task3Main():
+    global mask; global frame_with_keypoints;
+    global newFrame;
+    global mutex; global quitFlag;
+    rate = rospy.Rate(10)
     root = Tk()
     entry = Lab3Display.Entry_GUI(master=root)
     entry.mainloop()
     entry.destroy()
-    minH1 = entry.minH[0].get(); minS1 = entry.minS[0].get(); minV1 = entry.minV[0].get();
-    maxH1 = entry.maxH[0].get(); maxS1 = entry.maxS[0].get(); maxV1 = entry.maxV[0].get();
+    minH=[0,0,0]; minS=[0,0,0]; minV=[0,0,0]; maxH=[0,0,0]; maxS=[0,0,0]; maxV=[0,0,0]
+    for i in range (3):
+        minH[i] = entry.minH[i].get(); minS[i] = entry.minS[i].get(); minV[i] = entry.minV[i].get();
+        maxH[i] = entry.maxH[i].get(); maxS[i] = entry.maxS[i].get(); maxV[i] = entry.maxV[i].get();
     
-    minH2 = entry.minH[1].get(); minS2 = entry.minS[1].get(); minV2 = entry.minV[1].get();
-    maxH2 = entry.maxH[1].get(); maxS2 = entry.maxS[1].get(); maxV2 = entry.maxV[1].get();
-    
-    minH3 = entry.minH[2].get(); minS3 = entry.minS[2].get(); minV3 = entry.minV[2].get();
-    maxH3 = entry.maxH[2].get(); maxS3 = entry.maxS[2].get(); maxV3 = entry.maxV[2].get();
-    
-    #print("H1: " +str(minH1) +"-" +str(maxH1)+"\nS1: "+str(minS1) +"-" +str(maxS1)+"\nV1: " +str(minV1) +"-" +str(maxV1))  
-    #print("H2: " +str(minH2) +"-" +str(maxH2)+"\nS2: "+str(minS2) +"-" +str(maxS2)+"\nV2: " +str(minV2) +"-" +str(maxV2))
-    #print("H3: " +str(minH3) +"-" +str(maxH3)+"\nS3: "+str(minS3) +"-" +str(maxS3)+"\nV3: " +str(minV3) +"-" +str(maxV3))
     display = Lab3Display.Application(master=root)
     
     #Call these two lines to update gui
     display.update_idletasks()
     display.update()
+ 
     
-    global sense
+    t3Thread = threading.Thread(target=Task3, args=(display,minH, minS, minV, maxH, maxS, maxV,))
+
+    t3Thread.start()
+    while not rospy.is_shutdown(): #GUI must be ran on main thread. Task2 ran on seperate thread.
+        try:
+            display.updateDisplay()
+            display.update_idletasks()
+            display.update()
+            if(finished==True):
+                cv2.destroyAllWindows()
+                break
+            elif(newFrame==True):
+                cv2.imshow(WINDOW1, mask)
+                cv2.imshow(WINDOW2, frame_with_keypoints)
+                c = cv2.waitKey(1)
+                newFrame=False
+            rate.sleep()
+        except Exception as e:
+            #print(e)
+            break
+        
+    quitFlag=1
+    display.mainloop()
+    root.destroy()
+    t3Thread.join()    
+    return
+    
+
+def Task3(display, minH, minS, minV, maxH, maxS, maxV):
+    global sense; global finished
+    ic = ImageConverter.image_converter()
+    ic.mutex.acquire()
+    global frame; global mutex;
+    global mask; global frame_with_keypoints;
+    global newFrame;
+    
     # Initialize the SimpleBlobDetector
     params = cv2.SimpleBlobDetector_Params()
     detector = cv2.SimpleBlobDetector_create(params)
@@ -267,23 +312,11 @@ def Task3(ic):
         fs2.release()
     
     fs.release()
-
-    # Create windows
-    cv2.namedWindow(WINDOW1)
-    cv2.namedWindow(WINDOW2)
-
-    # Create trackbars
-    #cv2.createTrackbar("Min Hue", WINDOW1, minH, 180, onMinHTrackbar)
-    #cv2.createTrackbar("Max Hue", WINDOW1, maxH, 180, onMaxHTrackbar)
-    #cv2.createTrackbar("Min Sat", WINDOW1, minS, 255, onMinSTrackbar)
-    #cv2.createTrackbar("Max Sat", WINDOW1, maxS, 255, onMaxSTrackbar)
-    #cv2.createTrackbar("Min Val", WINDOW1, minV, 255, onMinVTrackbar)
-    #cv2.createTrackbar("Max Val", WINDOW1, maxV, 255, onMaxVTrackbar)
-    
-    
+ 
     fps, prev = 0.0, 0.0
-    
-    while not rospy.is_shutdown():
+        
+    while quitFlag==0:
+        
         # Calculate FPS
         ic.mutex.acquire()
         now = rospy.get_time()
@@ -298,7 +331,7 @@ def Task3(ic):
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         
         # Create a mask using the given HSV range
-        mask = cv2.inRange(frame_hsv, (minH1, minS1, minV1), (maxH1, maxS1, maxV1))
+        mask = cv2.inRange(frame_hsv, (minH[0], minS[0], minV[0]), (maxH[0], maxS[0], maxV[0]))
         
 
         # Run the SimpleBlobDetector on the mask.
@@ -314,9 +347,8 @@ def Task3(ic):
         cv2.putText(frame_with_keypoints, "FPS: {:.1f}".format(fps), (5, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0))
         cv2.putText(frame_with_keypoints, "{} blobs".format(len(keypoints)), (5, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0))
     
-        # Display the frame
-        cv2.imshow(WINDOW1, mask)
-        cv2.imshow(WINDOW2, frame_with_keypoints)
+        
+        newFrame=True
         
         
         if(len(keypoints) >0):
@@ -324,7 +356,7 @@ def Task3(ic):
             for i in keypoints:
                 if i.size>largest.size:
                     largest = i
-            #print(largest.pt[0])     
+            print(largest.pt[0])     
             if(largest.pt[0]<200 and largest.pt[0]>100):
                 SetSpeeds.setspeeds(0, 0)
                 r1 = sense[1]*39.3701
@@ -344,23 +376,18 @@ def Task3(ic):
         else:
             SetSpeeds.setspeeds(-3, 3)
     
-        c = cv2.waitKey(1)
+        #c = cv2.waitKey(1)
     display.R1 = r1
-    #Call these three lines to update gui
-    display.updateDisplay()
-    display.update_idletasks()
-    display.update()
     
     SetSpeeds.setspeeds(0, 0)
     
     
-    while not rospy.is_shutdown():
+    while quitFlag==0:
         # Calculate FPS
         ic.mutex.acquire()
         now = rospy.get_time()
         fps = (fps*FPS_SMOOTHING + (1/(now - prev))*(1.0 - FPS_SMOOTHING))
         prev = now
-
         # Get a frame
         frame = ic.cv_image
     
@@ -369,8 +396,7 @@ def Task3(ic):
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         
         # Create a mask using the given HSV range
-        mask = cv2.inRange(frame_hsv, (minH2, minS2, minV2), (maxH2, maxS2, maxV2))
-        
+        mask = cv2.inRange(frame_hsv, (minH[1], minS[1], minV[1]), (maxH[1], maxS[1], maxV[1]))
 
         # Run the SimpleBlobDetector on the mask.
         # The results are stored in a vector of 'KeyPoint' objects,
@@ -385,10 +411,9 @@ def Task3(ic):
         cv2.putText(frame_with_keypoints, "FPS: {:.1f}".format(fps), (5, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0))
         cv2.putText(frame_with_keypoints, "{} blobs".format(len(keypoints)), (5, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0))
     
-        # Display the frame
-        cv2.imshow(WINDOW1, mask)
-        cv2.imshow(WINDOW2, frame_with_keypoints)
-        
+
+        newFrame=True
+
         
         if(len(keypoints) >0):
             largest = keypoints[0]
@@ -414,16 +439,12 @@ def Task3(ic):
             
         else:
             SetSpeeds.setspeeds(-3, 3)
-        c = cv2.waitKey(1)
+        #c = cv2.waitKey(1)
     display.R2 = r2
-    #Call these three lines to update gui
-    display.updateDisplay()
-    display.update_idletasks()
-    display.update()
     
     SetSpeeds.setspeeds(0, 0)
     
-    while not rospy.is_shutdown():
+    while quitFlag==0:
         # Calculate FPS
         ic.mutex.acquire()
         now = rospy.get_time()
@@ -438,7 +459,7 @@ def Task3(ic):
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         
         # Create a mask using the given HSV range
-        mask = cv2.inRange(frame_hsv, (minH3, minS3, minV3), (maxH3, maxS3, maxV3))
+        mask = cv2.inRange(frame_hsv, (minH[2], minS[2], minV[2]), (maxH[2], maxS[2], maxV[2]))
         
 
         # Run the SimpleBlobDetector on the mask.
@@ -454,9 +475,7 @@ def Task3(ic):
         cv2.putText(frame_with_keypoints, "FPS: {:.1f}".format(fps), (5, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0))
         cv2.putText(frame_with_keypoints, "{} blobs".format(len(keypoints)), (5, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0))
     
-        # Display the frame
-        cv2.imshow(WINDOW1, mask)
-        cv2.imshow(WINDOW2, frame_with_keypoints)
+        newFrame=True
         
         
         if(len(keypoints) >0):
@@ -464,7 +483,6 @@ def Task3(ic):
             for i in keypoints:
                 if i.size>largest.size:
                     largest = i
-            #print(largest.pt[0])     
             if(largest.pt[0]<200 and largest.pt[0]>100):
                 SetSpeeds.setspeeds(0, 0)
                 r3 = sense[1]*39.3701
@@ -483,25 +501,12 @@ def Task3(ic):
             
         else:
             SetSpeeds.setspeeds(-3, 3)
-        c = cv2.waitKey(1)
     display.R3 = r3
-    #Call these three lines to update gui
-    display.updateDisplay()
-    display.update_idletasks()
-    display.update()
-    
+
     SetSpeeds.setspeeds(0, 0)
-    cv2.destroyWindow(WINDOW1)
-    cv2.destroyWindow(WINDOW2)
+    finished = True
     
-    while not rospy.is_shutdown():
-        display.update_idletasks()
-        display.update()
-    
-    root.destroy()
-    #print("R1:" +str(r1))
-    #print("R2:" +str(r2))
-    #print("R3:" +str(r3))
+
 def Task4(ic):
     pass
 

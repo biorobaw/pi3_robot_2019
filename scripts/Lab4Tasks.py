@@ -6,21 +6,27 @@ import sys
 import rospy
 import cv2
 import SetSpeeds
-import numpy as np
 from std_msgs.msg import String
 import Lab4Grid
+import ImageConverter
+##for sensors
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import MultiArrayLayout
 from std_msgs.msg import MultiArrayDimension
+##
 
+##for encoders
 from robot_client.srv import GetEncoder
 from robot_client.srv import GetEncoderRequest
 from robot_client.srv import GetEncoderResponse
+##
 
-from sensor_msgs.msg import Image
+## if camera is used
+from sensor_msgs.msg import Image 
 from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 from threading import Thread, Lock
+##
 import threading
 import math
 
@@ -52,8 +58,9 @@ circumference = 2*math.pi*(diameter/2) #circumference for 2.55 is 8.0110612
 rospy.wait_for_service('pi3_robot_2019/r1/get_encoder')
 get_encoder = rospy.ServiceProxy('pi3_robot_2019/r1/get_encoder', GetEncoder)
 
-global sense
-sense = (0.0, 0.0, 0.0) 
+cellMoved=1; quitFlag=0;#cell moved is a global flag that tells the gui to update the grid
+
+global sense; sense = (0.0, 0.0, 0.0) 
 
 def distance_sensors(msg):
     global sense
@@ -245,20 +252,39 @@ def faceForward(ic):
     
     SetSpeeds.setspeeds(0, 0)
         
-        
-def Task2(inputCell,inputDir):
+
+def Task2Main(inputCell,inputDir):
     rate = rospy.Rate(10)
     root = Tk()
-    global maze1
+    global maze1; global cellMoved; global quitFlag
     gui = Lab4Grid.Application(master=root)
-    gui.update_idletasks()
-    gui.update()
+    t2Thread = threading.Thread(target=Task2, args=(gui,inputCell,inputDir,))
+    t2Thread.start()
+    while not rospy.is_shutdown(): #GUI must be ran on main thread. Task2 ran on seperate thread.
+        try:
+            if(cellMoved==1):
+                gui.updateGrid()
+                #print()
+                cellMoved=0
+            gui.update_idletasks()
+            gui.update()
+            rate.sleep()
+        except Exception as e:
+            print("caught here")
+            break
+            
+    quitFlag=1
+    t2Thread.join()
+
+def Task2(gui,inputCell,inputDir):
+    global cellMoved; global quitFlag
+    rate = rospy.Rate(10)
     curcell = inputCell-1
     dir_Num = inputDir
     dir_Enum = ['N','E','S','W']
     marked = False
     markCell(curcell, dir_Num)
-    while not rospy.is_shutdown():
+    while quitFlag == 0:
         for i in range (16):
             if (maze1[i][0]==0):
                 break
@@ -268,12 +294,12 @@ def Task2(inputCell,inputDir):
         if marked ==True:
             break
         
+        
         gui.maze = maze1
         gui.curcell = curcell
         gui.dir = dir_Enum[dir_Num]
-        gui.updateGrid()
-        gui.update_idletasks() #UPDATING DISPLAY
-        gui.update()
+        cellMoved=1
+
         
 
         dirL = dir_Num
@@ -324,9 +350,7 @@ def Task2(inputCell,inputDir):
         print("endloop")
         #adjustCell()
         rospy.sleep(1)
-        
-    while not rospy.is_shutdown():
-        pass
+     
     return
 def adjustCell():
     rate = rospy.Rate(10)
@@ -508,35 +532,90 @@ def Turn(Degrees):
     print(c)
         
     SetSpeeds.setspeeds(0,0)
-    
-    
-    
-def startGridGUI():
-    pass
 
-def Test():
+    
+def Task2SingleThread(inputCell,inputDir):
+    rate = rospy.Rate(10)
     root = Tk()
-    gui = Lab4Grid.Application(master=root2)
+    global maze1
+    gui = Lab4Grid.Application(master=root)
     gui.update_idletasks()
     gui.update()
-
-    print("blah")
-  
-    print("blah")
-    i = 0
+    curcell = inputCell-1
+    dir_Num = inputDir
+    dir_Enum = ['N','E','S','W']
+    marked = False
+    markCell(curcell, dir_Num)
     while not rospy.is_shutdown():
+        for i in range (16):
+            if (maze1[i][0]==0):
+                break
+            if i ==16:
+                marked = True
+            
+        if marked ==True:
+            break
+        
         gui.maze = maze1
-        if(i%2):
-            gui.maze = maze2
+        gui.curcell = curcell
+        gui.dir = dir_Enum[dir_Num]
         gui.updateGrid()
-        gui.update_idletasks()
+        gui.update_idletasks() #UPDATING DISPLAY
         gui.update()
+        
+
+        dirL = dir_Num
+        if(dirL==0):
+            dirL=4
+        dirR=((dir_Num+1)%4)+1
+        
+        if(dir_Num==0):
+            cellLeft=curcell-1
+            cellRight=curcell+1
+        elif(dir_Num==1):
+            cellLeft=curcell-4
+            cellRight=curcell+1
+        elif(dir_Num==2):
+            cellLeft=curcell+1
+            cellRight=curcell-1
+        elif(dir_Num==3):
+            cellLeft=curcell+4
+            cellRight=curcell-4
+            
+        
+        if(maze1[curcell][dir_Num+1]==0): ##if there is no cell in front of us
+            print("moving")
+            moveCell()
+            curcell = nextCell(curcell, dir_Num)
+            markCell(curcell, dir_Num)
+        elif(maze1[curcell][dirL]==0 or maze1[curcell][dirR]==0):
+            if(maze1[curcell][dirL]==0):
+                print("left turn")
+                Turn(-90)
+                dir_Num = dir_Num-1
+                if(dir_Num<0):
+                    dir_Num=3
+            else:
+                Turn(90)
+                dir_Num = ((dir_Num+1)%4)
+        else:
+            print("unknown")
+            Turn(-90)
+            dir_Num = dir_Num-1
+            if(dir_Num<0):
+                dir_Num=3
+        
+        
+        print(curcell)
+        print(dir_Num)
+        print(dirL)
+        print("endloop")
+        #adjustCell()
         rospy.sleep(1)
-        i= i +1
-    
+        
+    while not rospy.is_shutdown():
+        pass
     return
-    
-    
 
 
         
