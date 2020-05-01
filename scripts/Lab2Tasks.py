@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-import time
 import math
-from geometry_msgs.msg import Twist
-from std_msgs.msg import String
+
 from robot_client.srv import GetEncoder
 from robot_client.srv import GetEncoderRequest
 from robot_client.srv import GetEncoderResponse

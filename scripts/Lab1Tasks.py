@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-import time
 import math
-from geometry_msgs.msg import Twist
-from std_msgs.msg import String
 from robot_client.srv import GetEncoder
 from robot_client.srv import GetEncoderRequest
 from robot_client.srv import GetEncoderResponse
@@ -15,7 +12,6 @@ import SetSpeeds
 rospy.wait_for_service('pi3_robot_2019/r1/get_encoder')
 get_encoder = rospy.ServiceProxy('pi3_robot_2019/r1/get_encoder', GetEncoder)
 
-speedvw = Twist()
 
 
 #=================Robot Dimensions==================================
@@ -24,7 +20,7 @@ width = 4.2
 circumference = 2*math.pi*(diameter/2) #circumference for 2.55 is 8.0110612
 
     
-def Distance(X, Y): 
+def Task2(X, Y): 
     linSpeed = X/Y
     SetSpeeds.setspeeds(linSpeed,linSpeed)
     
@@ -44,7 +40,7 @@ def Distance(X, Y):
     SetSpeeds.setspeeds(0,0)
     print("Time: " + str(TIME))
 
-def Orientation(Degrees, Seconds): 
+def Task3(Degrees, Seconds): 
     #linSpeed = X/Y
     rate = rospy.Rate(10)
     SetSpeeds.setspeedsvw(0,Degrees*math.pi/(180*Seconds))
@@ -131,7 +127,7 @@ def Task4(H, W, Y):
 
    
    
-def Circle(R, Y):
+def Task5(R, Y):
     halfcircum = R*math.pi
     V = (halfcircum)/Y
     W= -V/R

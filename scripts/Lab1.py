@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-import time
-import math
-from geometry_msgs.msg import Twist
-from std_msgs.msg import String
-from robot_client.srv import GetEncoder
-from robot_client.srv import GetEncoderRequest
-from robot_client.srv import GetEncoderResponse
 from Tkinter import *
+import SetSpeeds
 import Lab1Tasks
 
 
@@ -19,6 +13,7 @@ rate = rospy.Rate(10) # 10hz
     
 def on_shutdown():
     rospy.loginfo("Shutting down")
+    SetSpeeds.setspeeds(0,0)
     rate.sleep()
 
     
@@ -275,13 +270,13 @@ if __name__ == '__main__':
             app = Forward_GUI(master=root)
             app.mainloop()
             root.destroy()
-            Lab1Tasks.Distance(app.x_var.get(), app.y_var.get())
+            Lab1Tasks.Task2(app.x_var.get(), app.y_var.get())
         elif(app.function == "Task3"):
             root = Tk()
             app = Orientation_GUI(master=root)
             app.mainloop()
             root.destroy()
-            Lab1Tasks.Orientation(app.degrees.get(), app.secs.get())
+            Lab1Tasks.Task3(app.degrees.get(), app.secs.get())
         elif(app.function == "Task4"):
             root = Tk()
             app = Task4_GUI(master=root)
@@ -293,7 +288,7 @@ if __name__ == '__main__':
             app = Task5_GUI(master=root)
             app.mainloop()
             root.destroy()
-            Lab1Tasks.Circle(float(app.R1_var.get()),float(app.Y_var.get()))
+            Lab1Tasks.Task5(float(app.R1_var.get()),float(app.Y_var.get()))
             
         
     except rospy.ROSInterruptException:

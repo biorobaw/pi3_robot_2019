@@ -1,19 +1,10 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-import time
-import math
-from geometry_msgs.msg import Twist
-from std_msgs.msg import String
-from robot_client.srv import GetEncoder
-from robot_client.srv import GetEncoderRequest
-from robot_client.srv import GetEncoderResponse
+
 from Tkinter import *
 import Lab2Tasks
 import SetSpeeds
-from std_msgs.msg import Float32MultiArray
-from std_msgs.msg import MultiArrayLayout
-from std_msgs.msg import MultiArrayDimension
 
 rospy.init_node('lab2', anonymous=True)
 rate = rospy.Rate(10) # 10hz
