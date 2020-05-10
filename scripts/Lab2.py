@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-
-from Tkinter import *
-import Lab2Tasks
+from Tkinter import * #For GUI
+import Lab2Tasks #Contains student defined lab task programs
 import SetSpeeds
 
 rospy.init_node('lab2', anonymous=True)
 rate = rospy.Rate(10) # 10hz
     
-def on_shutdown():
+def on_shutdown(): #called when shutting down
     rospy.loginfo("Shutting down")
-    SetSpeeds.setspeeds(0,0)
-
+    SetSpeeds.setspeeds(0,0) #stops robot
     rate.sleep()
     
 class Application(Frame):

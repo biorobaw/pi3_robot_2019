@@ -1,17 +1,8 @@
 #!/usr/bin/env python
-from __future__ import print_function
-
-import roslib
-import sys
+#import roslib
+#import sys
 import rospy
-import cv2
 import Lab4Tasks
-import numpy as np
-from std_msgs.msg import String
-from sensor_msgs.msg import Image
-from sensor_msgs.msg import CompressedImage
-from cv_bridge import CvBridge, CvBridgeError
-from threading import Thread, Lock
 from Tkinter import *
 import SetSpeeds
 
@@ -130,12 +121,7 @@ if __name__ == '__main__':
             app2 = Entry_GUI(master=root2)
             app2.mainloop()
             root2.destroy()
-            Lab4Tasks.Task2Main(app2.curcell.get(),app2.dir)
-    
-    except rospy.ROSInterruptException:
-        rospy.loginfo("InteruptException")
-        #on_shutdown()
+            #Lab4Tasks.Task2Main(app2.curcell.get(),app2.dir)
+            Lab4Tasks.Task2SingleThread(app2.curcell.get(),app2.dir)
     except Exception as e:
-        print("Exception Interrupt")
-        #root.destroy()
-        #on_shutdown()
+        print(e)

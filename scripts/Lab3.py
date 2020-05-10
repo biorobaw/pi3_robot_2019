@@ -1,26 +1,56 @@
 #!/usr/bin/env python
-from __future__ import print_function
 
-import roslib
-import sys
 import rospy
-import cv2
 import Lab3Tasks
 import SetSpeeds
-import numpy as np
-from std_msgs.msg import String
-from sensor_msgs.msg import Image
-from sensor_msgs.msg import CompressedImage
-from cv_bridge import CvBridge, CvBridgeError
-from threading import Thread, Lock
 from Tkinter import *
+from robot_client.srv import RunFunction
+from robot_client.srv import RunFunctionRequest
+from robot_client.srv import RunFunctionResponse
+
+rospy.wait_for_service('pi3_robot_2019/r1/run_function')
+run_function = rospy.ServiceProxy('pi3_robot_2019/r1/run_function', RunFunction)
 
 def on_shutdown():
     rospy.loginfo("Shutting down")
     SetSpeeds.setspeeds(0,0)
+    result = run_function("init_camera",["kill"])
+    print(result)
     rate.sleep()
 
 #==========================GUI STUFF================
+class Resolution_GUI(Frame):
+    def createWidgets(self):
+        self.QUIT = Button(self)
+        self.QUIT["text"] = "Enter width x height and quality    \n"
+        self.QUIT["fg"]   = "red"
+        self.QUIT["command"] =  self.quit
+        self.QUIT.grid(row=0, column=0,ipadx=150, ipady=150, sticky="ew")
+
+        self.w = IntVar()
+        self.w.set(320)
+        self.entry1 = Entry(self)
+        self.entry1["textvariable"] = self.w
+        self.entry1.grid(row=1,ipadx=100, ipady=25, sticky="ew")
+        
+        self.h = IntVar()
+        self.h.set(240)
+        self.entry2 = Entry(self)
+        self.entry2["textvariable"] = self.h
+        self.entry2.grid(row=2,ipadx=100, ipady=25, sticky="ew")
+        
+        self.q = IntVar()
+        self.q.set(100)
+        self.entry3 = Entry(self)
+        self.entry3["textvariable"] = self.q
+        self.entry3.grid(row=3,ipadx=100, ipady=25, sticky="ew")
+           
+
+    def __init__(self, master=None):
+        Frame.__init__(self, master)
+        self.pack()
+        self.createWidgets()
+    
 class Application(Frame):
     function = ""
     def Task1(self):
@@ -73,16 +103,24 @@ class Application(Frame):
         self.pack()
         self.createWidgets()
         
-def main(args):
-    pass
 
 if __name__ == '__main__':
     
     try:
-        rospy.init_node('image_converter', anonymous=True)
+        rospy.init_node('lab_3', anonymous=True)
         rospy.on_shutdown(on_shutdown)
         rate = rospy.Rate(10) # 10hz
         root = Tk()
+        res = Resolution_GUI(master=root)
+        res.mainloop()
+        res.destroy()
+        if(res.w.get()==0 or res.w.get()==0 or res.q.get()==0):
+            root.destroy()
+            raise Exception('Not valid resolution')
+        else:
+            result = run_function("init_camera",[str(res.w.get()),str(res.w.get()),str(res.q.get())])
+            print(result)
+        
         app = Application(master=root)
         app.mainloop()
         root.destroy()
@@ -92,23 +130,13 @@ if __name__ == '__main__':
 
         elif(app.function =="Task1"):
             Lab3Tasks.Task1()
-            pass
         elif(app.function =="Task2"):
             Lab3Tasks.Task2()
-            pass
         elif(app.function =="Task3"):
             Lab3Tasks.Task3Main()
-            pass
         elif(app.function =="Task4"):
             Lab3Tasks.Task4()
-            pass
-        
-    except rospy.ROSInterruptException:
-        rospy.loginfo("InteruptException")
-        on_shutdown()
     except Exception as e:
-        #print(e)
-        on_shutdown()
-        #pass
+        print(e)
 
     

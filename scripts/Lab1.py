@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
-from Tkinter import *
-import SetSpeeds
-import Lab1Tasks
+from Tkinter import * #For GUI
+import SetSpeeds #Used for setting speeds to 0 on shutdown
+import Lab1Tasks #Contains student defined lab task programs
 
 
 rospy.init_node('lab1', anonymous=True)
@@ -11,9 +11,9 @@ rate = rospy.Rate(10) # 10hz
 
 
     
-def on_shutdown():
+def on_shutdown(): #Called when shutting down
     rospy.loginfo("Shutting down")
-    SetSpeeds.setspeeds(0,0)
+    SetSpeeds.setspeeds(0,0) #Stop Robot
     rate.sleep()
 
     
