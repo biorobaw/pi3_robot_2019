@@ -7,6 +7,7 @@ from __future__ import division
 import time
 import MyEncoders
 import RPi.GPIO as GPIO
+import rospy
 # Import the PCA9685 module.
 import Adafruit_PCA9685
 import json
@@ -101,17 +102,17 @@ def calibrate():
     while x <= MAX_INPUT:
         # Move servo on channel O between extremes.
         MyEncoders.counts = [0,0]
-        print("setSpeeds(%d, %d)" %(x, x))
-        setSpeeds(x,x)
+        print("setSpeeds(%d, %d)" %(x, -x))
+        setSpeeds(x,-x)
         time.sleep(1)
         print("counts = %d, %d" %(MyEncoders.counts[0], MyEncoders.counts[1]))
         if x < 0:
             leftSpeedmap[x+MAX_INPUT] = -1 * (MyEncoders.counts[0] / 32)
-            rightSpeedmap[x+MAX_INPUT] = -1 * (MyEncoders.counts[1] / 32)
+            rightSpeedmap[MAX_INPUT-x] =  (MyEncoders.counts[1] / 32)
         else:
             leftSpeedmap[x+MAX_INPUT] = MyEncoders.counts[0] / 32
-            rightSpeedmap[x+MAX_INPUT] = MyEncoders.counts[1] / 32
-        x += 1
+            rightSpeedmap[MAX_INPUT-x] = -1 * MyEncoders.counts[1] / 32
+        x += 1  #flipped values for circular calibration
 
     setSpeeds(0,0)
     print(leftSpeedmap) 
@@ -150,6 +151,7 @@ print(leftSpeedmap)
 print(rightSpeedmap)
       
 if __name__ == '__main__':
+    rospy.init_node("calibrating")
     raw_input("press enter to calibrate...")
     calibrate()
     saveCalibration()
