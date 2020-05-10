@@ -102,22 +102,48 @@ camera = None
 def init_camera(params):
 	global camera
 	if camera==None:
-		camera = subprocess.Popen([
-			"rosrun",
-			"raspicam_node",	# google raspicam_node for details
-			"raspicam_node",
-			"_width:=320",
-			"_height:=240",
-			"_framerate:=30", #actual framerate is 1/3 chosen value
-			"_quality:=100",
-			"_ISO:=200",
-			"_shutter_speed:=100000",
-			"_saturation:=50",
-			"_awb_mode:=horizon",
-			"__ns:="+rospy.get_name(),
-			"__name:=cam"
-		])
-	return 'ok'
+		if len(params)==3:
+			camera = subprocess.Popen([
+				"rosrun",
+				"raspicam_node",	# google raspicam_node for details
+				"raspicam_node",
+				"_width:="+str(params[0]),
+				"_height:="+str(params[1]),
+				"_framerate:=30", #actual framerate is 1/3 chosen value
+				"_quality:="+str(params[2]),
+				"_ISO:=200",
+				"_shutter_speed:=100000",
+				"_saturation:=50",
+				"_awb_mode:=horizon",
+				"__ns:="+rospy.get_name(),
+				"__name:=cam"
+			])
+		else:
+			camera = subprocess.Popen([
+				"rosrun",
+				"raspicam_node",	# google raspicam_node for details
+				"raspicam_node",
+				"_width:=320",
+				"_height:=240",
+				"_framerate:=30", #actual framerate is 1/3 chosen value
+				"_quality:=100",
+				"_ISO:=200",
+				"_shutter_speed:=100000",
+				"_saturation:=50",
+				"_awb_mode:=horizon",
+				"__ns:="+rospy.get_name(),
+				"__name:=cam"
+			])
+		return 'ok'
+	if(len(params) >0 and params[0]=='kill'):
+		camera.send_signal(subprocess.signal.SIGINT)
+		camera=None	
+		return 'killed'
+		
+	camera.send_signal(subprocess.signal.SIGINT)
+	camera=None	
+	return init_camera(params)
+	
 
 # list of functions
 function_map = {
@@ -169,7 +195,7 @@ if __name__ == '__main__':
 		
 		# spin until shutdown
 		print('Waiting for commands...')
-		init_camera(None)
+		#init_camera(None)
 		init_distance_sensors(['10'])
 		rospy.spin()
 		print('Shutting down')
