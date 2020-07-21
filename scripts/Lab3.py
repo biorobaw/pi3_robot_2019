@@ -118,7 +118,7 @@ if __name__ == '__main__':
             root.destroy()
             raise Exception('Not valid resolution')
         else:
-            result = run_function("init_camera",[str(res.w.get()),str(res.w.get()),str(res.q.get())])
+            result = run_function("init_camera",[str(res.w.get()),str(res.h.get()),str(res.q.get())])
             print(result)
         
         app = Application(master=root)
