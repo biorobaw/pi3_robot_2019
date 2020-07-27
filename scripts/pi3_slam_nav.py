@@ -32,8 +32,10 @@ width = 4.2
 sensorwidth = 3
 circumference = 2*math.pi*(diameter/2) #circumference for 2.55 is 8.0110612
 
+thread = False
 maxspeed = 4
 turningspeed= 1
+timeLimit = 2
 k=.5
 x = 0
 y = 0
@@ -64,9 +66,9 @@ def pose_fun(msg):
 	yaw = euler[2]
     
     	th = yaw;
-	#timeNow= rospy.get_time()
+	timeNow= rospy.get_time()
 	#dTime = timeNow-prevTime
-	#prevTime = timeNow
+	prevTime = timeNow
 	
 	#print(th)
 
@@ -91,6 +93,7 @@ def on_shutdown(): #Called when shutting down
 def moveCoord(xC, yC):#function for navigating to coordinate
         print(xC)
 	print(yC)
+	global thread
 	stop = False
 	while thread:
 		yaw = math.atan2(yC-y, xC-x);
@@ -105,17 +108,17 @@ def moveCoord(xC, yC):#function for navigating to coordinate
         	f = sense[1]*39.3701
         	r = sense[2]*39.3701 
 
-		#if(stop ==False and dTime>1):
-		#	stop=True
-		#	SetSpeeds.setspeeds(0,0)
-		#	rate.sleep()
-		#	continue
-		#else:
-		#	if(dTime>1):
-		#		rate.sleep()
-		#		continue
-		#	else:
-		#		lock=False
+		if(stop ==False and (rospy.get_time() -prevTime)>timeLimit):
+			stop=True
+			SetSpeeds.setspeeds(0,0)
+			rate.sleep()
+			continue
+		else:
+			if((rospy.get_time() -prevTime)>1):
+				rate.sleep()
+				continue
+			else:
+				stop=False
 			
 
 			
@@ -142,9 +145,11 @@ def moveCoord(xC, yC):#function for navigating to coordinate
 		else: #if the robot has reached the goal, finish
 			print("Reached the coordinate: (" +str(xC)+", "+str(yC)+")")
 			SetSpeeds.setspeeds(0,0)
+			thread = False
 			return
 		
 		rate.sleep()
+	
 				
     
 #==========================GUI STUFF================
@@ -186,21 +191,28 @@ class Application(Frame):
 
    
     def quit(self):
-	on_shutdown() 
-	self.destroy()   
-        
+	self.master.destroy()
+	on_shutdown()        
     def set_Pose(self):
-	textTemp = "Your Pose\nX: " +str(x)+"\nY: " + str(y) +"\nTh: "+str(th) +"\nPress to move to coordinates entered" + str(dTime)
-	if(dTime>1):
-		textTemp+= "Robot is lost, please move the robot until\nit localizes"
+	textTemp = "Your Pose\nX: " +str(x)+"\nY: " + str(y) +"\nTh: "+str(th) 
+	if(thread ==False):
+		textTemp+="\nPress to move to coordinates entered" #+ str(dTime)
+	else:
+		textTemp+= "\nMoving to: ("+self.x_var.get()+", " + self.y_var.get()+")"
+	if((rospy.get_time() -prevTime)>timeLimit):
+		textTemp+= "\nRobot is lost, please move the robot until\nit localizes"
 	self.Pose["text"] = textTemp
 	self.after(500, self.set_Pose)
 
     def move(self):
-	#moveCoordThread.join()
+	global thread	
+	if (thread == True):
+		print("Already running")
+		return	
+
+	thread = True
 	moveCoordThread = Thread(target = moveCoord, args = (float(self.x_var.get()), float(self.y_var.get()), ))
 	moveCoordThread.start()
-	#moveCoord(float(self.x_var.get()), float(self.y_var.get()))
 	return
 
     def __init__(self, master=None):
