@@ -16,9 +16,12 @@ from std_msgs.msg import MultiArrayDimension
 from robot_client.srv import GetEncoder
 from robot_client.srv import GetEncoderRequest
 from robot_client.srv import GetEncoderResponse
-thread = True
+
 
 import SetSpeeds
+
+rospy.init_node('pi3_slam_nav', anonymous=True)
+rate = rospy.Rate(10) # 10hz
 
 rospy.wait_for_service('pi3_robot_2019/r1/get_encoder')
 get_encoder = rospy.ServiceProxy('pi3_robot_2019/r1/get_encoder', GetEncoder)
@@ -35,7 +38,8 @@ k=.5
 x = 0
 y = 0
 th = 0
-
+prevTime =0
+dTime=0
 sense = (0.0, 0.0, 0.0) 
 def distance_sensors(msg):
     global sense
@@ -48,6 +52,8 @@ def pose_fun(msg):
 	global x
 	global y
 	global th
+	global prevTime
+	global dTime
 	#print(msg.pose.position)
 	x = msg.pose.position.x
 	y = msg.pose.position.y
@@ -58,6 +64,10 @@ def pose_fun(msg):
 	yaw = euler[2]
     
     	th = yaw;
+	#timeNow= rospy.get_time()
+	#dTime = timeNow-prevTime
+	#prevTime = timeNow
+	
 	#print(th)
 
 	
@@ -66,8 +76,7 @@ rospy.Subscriber("/orb_slam2_mono/pose",
                          PoseStamped, pose_fun)
 
 
-rospy.init_node('lab1', anonymous=True)
-rate = rospy.Rate(10) # 10hz
+
 
 
     
@@ -82,6 +91,7 @@ def on_shutdown(): #Called when shutting down
 def moveCoord(xC, yC):#function for navigating to coordinate
         print(xC)
 	print(yC)
+	stop = False
 	while thread:
 		yaw = math.atan2(yC-y, xC-x);
 		print(yaw)
@@ -95,6 +105,20 @@ def moveCoord(xC, yC):#function for navigating to coordinate
         	f = sense[1]*39.3701
         	r = sense[2]*39.3701 
 
+		#if(stop ==False and dTime>1):
+		#	stop=True
+		#	SetSpeeds.setspeeds(0,0)
+		#	rate.sleep()
+		#	continue
+		#else:
+		#	if(dTime>1):
+		#		rate.sleep()
+		#		continue
+		#	else:
+		#		lock=False
+			
+
+			
 		if(abs((dth))>.1): #If the robot has delta theta greater than .1, turn in place.
 			print("Delta theta: "+str(dth))
 			if(dth>.5):
@@ -142,10 +166,10 @@ class Application(Frame):
         self.Pose.grid(row=0, column=1,ipadx=150, ipady=150, sticky="ew")
         self.Pose["command"] =  self.move
 
-	#Right wheel speed entry
+	#X coord entry
         self.x_cont = Entry(self)
         self.x_cont.grid(row=1, column=0,ipadx=100, ipady=50, sticky="ew")
-        #Left wheel speed entry
+        #Y coord entry
         self.y_cont = Entry(self)
 
         self.y_cont.grid(row=1, column=1,ipadx=100, ipady=50, sticky="ew")
@@ -162,10 +186,14 @@ class Application(Frame):
 
    
     def quit(self):
-	on_shutdown()    
+	on_shutdown() 
+	self.destroy()   
         
     def set_Pose(self):
-	self.Pose["text"] = "Your Pose\nX: " +str(x)+"\nY: " + str(y) +"\nTh: "+str(th) +"\nPress to move to coordinates entered"
+	textTemp = "Your Pose\nX: " +str(x)+"\nY: " + str(y) +"\nTh: "+str(th) +"\nPress to move to coordinates entered" + str(dTime)
+	if(dTime>1):
+		textTemp+= "Robot is lost, please move the robot until\nit localizes"
+	self.Pose["text"] = textTemp
 	self.after(500, self.set_Pose)
 
     def move(self):
